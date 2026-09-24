@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tranquera Abierta — Órdenes de Trabajo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#0F6E56;
+  --blue:#185FA5;--blue-light:#E6F1FB;
+  --amber:#FAEEDA;--amber-dark:#633806;
+  --red:#A32D2D;--red-light:#FCEBEB;
+  --border:#e2e2de;--bg:#f6f6f4;--white:#fff;
+  --text:#1a1a1a;--text2:#5a5a5a;--text3:#9a9a9a;
+  --radius:8px;--radius-lg:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.07);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
+/* HEADER */
+.app-header{background:var(--white);border-bottom:1px solid var(--border);padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-icon{width:38px;height:38px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0}
+.brand-name{font-size:15px;font-weight:700;line-height:1.2}
+.brand-sub{font-size:11px;color:var(--text2)}
+/* NAV — fix iOS Safari tap */
+.nav-tabs{display:flex;gap:3px}
+.nav-tab{padding:8px 12px;border-radius:10px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:74px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-appearance:none;appearance:none;outline:none}
+.nav-tab .ni{font-size:20px;line-height:1}
+.nav-tab .nl{font-size:11px;font-weight:600}
+.nav-tab:hover{background:var(--bg);color:var(--text)}
+.nav-tab.active{background:var(--green-light);color:var(--green-dark)}
+/* PAGES */
+.page{display:none;padding:1rem 1rem 2rem}
+.page.active{display:block}
+.container{max-width:820px;margin:0 auto}
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem;margin-bottom:.9rem;box-shadow:var(--shadow)}
+.card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:7px}
+/* CABECERA OT */
+.ot-header-wrap{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ot-header-fields{flex:1;min-width:0}
+.estado-corner{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.estado-corner .ec-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+/* FORMS */
+.form-row{display:grid;gap:10px;margin-bottom:10px}
+.cols2{grid-template-columns:1fr 1fr}
+.cols3{grid-template-columns:1fr 1fr 1fr}
+.cols4{grid-template-columns:1fr 1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:4px}
+label.lbl{font-size:12px;font-weight:600;color:var(--text2)}
+.opt{font-weight:400;color:var(--text3)}
+.req{color:var(--red);font-weight:700}
+input,select,textarea{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:16px;color:var(--text);background:var(--white);width:100%;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+input[readonly]{background:var(--bg);color:var(--text2);cursor:default}
+textarea{resize:vertical;min-height:64px;font-size:14px}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a5a5a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+/* TIPO TRABAJO */
+.tipo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:1rem}
+.tipo-btn{border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 8px;cursor:pointer;background:var(--white);transition:all .15s;text-align:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-appearance:none;appearance:none}
+.tipo-btn:active{transform:scale(.97)}
+.tipo-btn.selected{border-color:var(--green);background:var(--green-light)}
+.tipo-btn-icon{font-size:24px;margin-bottom:5px}
+.tipo-btn-label{font-size:12px;font-weight:600;color:var(--text);line-height:1.3}
+/* SERVICIOS */
+.servicios-container{display:none}
+.servicios-container.visible{display:block}
+.servicio-bloque{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.9rem;margin-bottom:8px}
+.cb-row{display:flex;align-items:center;gap:9px;margin-bottom:6px;padding:4px 0}
+.cb-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+.cb-label{font-size:14px;font-weight:600;cursor:pointer;user-select:none}
+.servicio-campos{display:none;margin-top:8px;padding:10px 12px;background:var(--white);border-radius:var(--radius);border-left:3px solid var(--green)}
+.servicio-campos.visible{display:block}
+/* HONORARIOS */
+.hon-box{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;margin-top:10px}
+.hon-section-lbl{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.hon-unit-lbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px}
+.radio-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.radio-pill{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;font-weight:600;padding:7px 13px;border:1.5px solid var(--border);border-radius:20px;transition:all .15s;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.radio-pill input{display:none}
+.radio-pill.sel{border-color:var(--green);background:var(--green-light);color:var(--green-dark)}
+.hon-calc-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;align-items:end}
+.hon-result{background:var(--green-light);border-radius:var(--radius);padding:8px 10px;font-size:14px;font-weight:700;color:var(--green-dark);text-align:right;min-height:38px;display:flex;align-items:center;justify-content:flex-end}
+.hon-result-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:3px}
+.selector-base{background:var(--bg);border-radius:var(--radius);padding:10px;margin:10px 0}
+.selector-base-lbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px}
+.facturando-info{font-size:11px;color:var(--text3);margin-top:5px}
+.facturando-info strong{color:var(--green-dark)}
+/* VIÁTICOS */
+.viatico-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.9rem;margin-bottom:8px;position:relative}
+.viatico-item.facturado{opacity:.5;pointer-events:none;background:#f0f0ee}
+.viatico-facturado-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--amber);color:var(--amber-dark);margin-bottom:8px}
+.viatico-nota{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4}
+/* FOTOS */
+.fotos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:8px}
+.foto-thumb{position:relative;aspect-ratio:1;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.foto-thumb img{width:100%;height:100%;object-fit:cover}
+.foto-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.foto-add-btn{aspect-ratio:1;border:1.5px dashed var(--border);border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:var(--white);gap:4px;font-size:11px;color:var(--text3);touch-action:manipulation}
+.foto-add-btn:hover{border-color:var(--green);color:var(--green)}
+.foto-add-btn .foto-icon{font-size:22px}
+/* BOTONES */
+.btn{padding:10px 18px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;border:1.5px solid transparent;display:inline-flex;align-items:center;gap:6px;touch-action:manipulation;line-height:1;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-invoice{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-invoice:hover{background:#0f4880}
+.btn-secondary{background:var(--white);color:var(--text);border-color:var(--border)}
+.btn-secondary:hover{background:var(--bg)}
+.btn-danger{background:var(--white);color:var(--red);border-color:var(--red-light)}
+.btn-danger:hover{background:var(--red-light)}
+.btn-warning{background:var(--amber);color:var(--amber-dark);border-color:#d4a843}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-icon{padding:6px 8px;border:none;background:transparent;cursor:pointer;color:var(--text3);border-radius:var(--radius);font-size:14px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.btn-icon:hover{color:var(--red);background:var(--red-light)}
+/* SAVE BAR */
+.save-bar-wrap{margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)}
+.save-bar{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.save-hint{text-align:right;margin-top:6px;font-size:11px;color:var(--text3)}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.badge-borrador{background:#F1EFE8;color:#5a5548}
+.badge-abierta{background:#E6F1FB;color:#0C447C}
+.badge-a-facturar{background:var(--amber);color:var(--amber-dark)}
+.badge-facturada{background:#E1F5EE;color:#085041}
+.badge-eliminada{background:#FCEBEB;color:#791F1F}
+/* TABLA */
+.ot-filters{display:flex;gap:7px;margin-bottom:1rem;flex-wrap:wrap}
+.filter-pill{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.filter-pill.active{background:var(--green);color:#fff;border-color:var(--green)}
+.ot-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.ot-table{width:100%;border-collapse:collapse;min-width:580px}
+table.ot-table th{font-size:11px;font-weight:700;color:var(--text2);text-align:left;padding:9px 12px;border-bottom:2px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em;background:var(--bg)}
+table.ot-table td{font-size:13px;padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.ot-table tr:hover td{background:#fafaf8}
+.ot-num{font-weight:700;color:var(--green);font-size:14px}
+.link-btn{background:none;border:none;color:var(--blue);cursor:pointer;font-size:13px;font-weight:600;padding:0;text-decoration:underline;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.empty-state{text-align:center;padding:3rem;color:var(--text3);font-size:14px}
+/* DETALLE */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.detail-field .dl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.detail-field .dv{font-size:14px;font-weight:500}
+.srv-item{background:var(--bg);border-radius:var(--radius);padding:10px 14px;margin-bottom:8px;border-left:3px solid var(--green)}
+.srv-item-nombre{font-weight:700;font-size:13px;margin-bottom:5px}
+.srv-item-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);padding:2px 0}
+.total-box{background:var(--green-light);border-radius:var(--radius-lg);padding:13px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+.total-label{font-size:13px;font-weight:700;color:var(--green-dark)}
+.total-val{font-size:20px;font-weight:700;color:var(--green)}
+.flow-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:.8rem}
+/* CONFIG */
+.config-table{width:100%;border-collapse:collapse}
+.config-table th{font-size:11px;font-weight:700;color:var(--text2);text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);text-transform:uppercase;background:var(--bg)}
+.config-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px}
+.config-table tr:last-child td{border-bottom:none}
+/* VETS ADMIN */
+.vet-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;background:var(--white)}
+.vet-nombre{font-size:13px;font-weight:500}
+.info-box{padding:10px 14px;border-radius:var(--radius);font-size:12px;line-height:1.5;margin-bottom:1rem;border-left:4px solid var(--green)}
+.info-box.warn{border-left-color:var(--amber-dark);background:#FFFBF0}
+.info-box.info{border-left-color:var(--blue);background:#F0F6FF}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:11px 22px;border-radius:var(--radius-lg);font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.toast.show{opacity:1}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--white);border-radius:var(--radius-lg);padding:1.5rem;max-width:380px;width:100%}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:.75rem}
+.modal-body{font-size:13px;color:var(--text2);margin-bottom:1.2rem;line-height:1.5}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:12px 0}
+.section-sub{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px}
+/* TORO ROW */
+.toro-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px}
+.btn-add-sub{border:1.5px dashed var(--border);border-radius:var(--radius);padding:7px 10px;background:transparent;color:var(--text2);cursor:pointer;font-size:13px;width:100%;margin-top:6px;transition:all .15s;touch-action:manipulation}
+.btn-add-sub:hover{border-color:var(--green);color:var(--green)}
+/* CONFIG mobile */
+.config-card-mobile{display:none}
+/* RESPONSIVE */
+@media(max-width:580px){
+  .cols2,.cols3,.cols4{grid-template-columns:1fr}
+  .hon-calc-grid{grid-template-columns:1fr 1fr}
+  .tipo-grid{grid-template-columns:repeat(2,1fr)}
+  .detail-grid{grid-template-columns:1fr}
+  .toro-row{grid-template-columns:1fr 1fr auto}
+  .save-bar{flex-direction:column}
+  .save-bar .btn{width:100%;justify-content:center}
+  .nav-tab{min-width:64px;padding:6px 8px}
+  .brand-sub{display:none}
+  .config-table{display:none}
+  .config-card-mobile{display:block}
+  .btn{padding:11px 16px}
+  .filter-pill{padding:8px 14px}
+  table.ot-table th,table.ot-table td{padding:8px 8px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand">
+    <div class="brand-icon">🐄</div>
+    <div>
+      <div class="brand-name">Tranquera Abierta</div>
+      <div class="brand-sub">Gestión veterinaria</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="nav-nueva" onclick="showPage('nueva')"><span class="ni">➕</span><span class="nl">Nueva OT</span></button>
+    <button class="nav-tab" id="nav-lista" onclick="showPage('lista')"><span class="ni">📋</span><span class="nl">Órdenes <span id="badge-n" style="background:var(--green);color:#fff;border-radius:20px;padding:0 5px;font-size:10px">0</span></span></button>
+    <button class="nav-tab" id="nav-config" onclick="showPage('config')"><span class="ni">⚙️</span><span class="nl">Valores</span></button>
+  </div>
+</div>
+
+<!-- ===== NUEVA OT ===== -->
+<div class="page active" id="page-nueva">
+<div class="container">
+
+<div class="card">
+  <div class="ot-header-wrap">
+    <div class="ot-header-fields">
+      <div class="card-title">📋 Datos del establecimiento</div>
+      <div class="form-row cols2">
+        <div class="form-group">
+          <label class="lbl">Establecimiento <span class="opt">(al menos uno requerido)</span></label>
+          <input type="text" id="f-estab" placeholder="Nombre del campo o estancia">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Dueño / Razón social <span class="opt">(al menos uno requerido)</span></label>
+          <input type="text" id="f-dueno" placeholder="Nombre del propietario">
+        </div>
+      </div>
+      <div class="form-row cols2">
+        <div class="form-group">
+          <label class="lbl">CUIT a facturar <span class="req">*</span></label>
+          <input type="text" id="f-cuit" placeholder="XX-XXXXXXXX-X" maxlength="13" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Contacto del cliente <span class="opt">(opcional)</span></label>
+          <input type="text" id="f-contacto" placeholder="Nombre y teléfono">
+        </div>
+      </div>
+      <div class="form-row cols2">
+        <div class="form-group">
+          <label class="lbl">Fecha <span class="opt">(opcional)</span></label>
+          <input type="text" id="f-fecha" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="maskDate(this)">
+        </div>
+        <div class="form-group">
+          <label class="lbl">Veterinario responsable <span class="opt">(opcional)</span></label>
+          <select id="f-vet"><option value="">— Seleccionar —</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="estado-corner">
+      <div class="ec-lbl">Estado</div>
+      <div id="f-estado-badge" class="badge badge-borrador">📝 Borrador</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">🔬 Tipo de trabajo — seleccioná uno</div>
+  <div class="tipo-grid">
+    <button class="tipo-btn" onclick="selectTipo('diag')" id="tipo-diag"><div class="tipo-btn-icon">🔍</div><div class="tipo-btn-label">Diagnóstico de preñez</div></button>
+    <button class="tipo-btn" onclick="selectTipo('semen')" id="tipo-semen"><div class="tipo-btn-icon">🧪</div><div class="tipo-btn-label">Semen</div></button>
+    <button class="tipo-btn" onclick="selectTipo('iatf')" id="tipo-iatf"><div class="tipo-btn-icon">💉</div><div class="tipo-btn-label">IATF</div></button>
+    <button class="tipo-btn" onclick="selectTipo('toros')" id="tipo-toros"><div class="tipo-btn-icon">🐂</div><div class="tipo-btn-label">Toros</div></button>
+    <button class="tipo-btn" onclick="selectTipo('colecta')" id="tipo-colecta"><div class="tipo-btn-icon">🧬</div><div class="tipo-btn-label">Colecta y Congelación (MOET)</div></button>
+    <button class="tipo-btn" onclick="selectTipo('transferencias')" id="tipo-transferencias"><div class="tipo-btn-icon">🔄</div><div class="tipo-btn-label">Transferencia Embrionaria</div></button>
+    <button class="tipo-btn" onclick="selectTipo('receptoras')" id="tipo-receptoras"><div class="tipo-btn-icon">🐄</div><div class="tipo-btn-label">Revisación receptoras</div></button>
+    <button class="tipo-btn" onclick="selectTipo('ecografia')" id="tipo-ecografia"><div class="tipo-btn-icon">📡</div><div class="tipo-btn-label">Ecografía de carcasa</div></button>
+  </div>
+
+  <!-- DIAG -->
+  <div class="servicios-container" id="srv-diag">
+    <div class="servicio-bloque">
+      <div class="cb-row"><input type="checkbox" id="cb-tacto" onchange="toggleSrv('tacto')"><label class="cb-label" for="cb-tacto">Tacto o ecografía</label></div>
+      <div class="servicio-campos" id="campos-tacto">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de animales</label><input type="number" id="tacto-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('tacto')"></div></div>
+        <div id="hon-tacto"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-sangrado-d" onchange="toggleSrv('sangrado-d')"><label class="cb-label" for="cb-sangrado-d">Sangrado</label></div>
+      <div class="servicio-campos" id="campos-sangrado-d">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de animales</label><input type="number" id="sangrado-d-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('sangrado-d')"></div></div>
+        <div id="hon-sangrado-d"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-tbc-d" onchange="toggleSrv('tbc-d')"><label class="cb-label" for="cb-tbc-d">TBC</label></div>
+      <div class="servicio-campos" id="campos-tbc-d">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de animales</label><input type="number" id="tbc-d-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('tbc-d')"></div></div>
+        <div id="hon-tbc-d"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMEN -->
+  <div class="servicios-container" id="srv-semen">
+    <div class="servicio-bloque">
+      <div class="cb-row"><input type="checkbox" id="cb-analisis" onchange="toggleSrv('analisis')"><label class="cb-label" for="cb-analisis">Análisis de semen</label></div>
+      <div class="servicio-campos" id="campos-analisis">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad</label><input type="number" id="analisis-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('analisis')"></div></div>
+        <div id="hon-analisis"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-espermograma" onchange="toggleSrv('espermograma')"><label class="cb-label" for="cb-espermograma">Espermograma</label></div>
+      <div class="servicio-campos" id="campos-espermograma">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad</label><input type="number" id="espermograma-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('espermograma')"></div></div>
+        <div id="hon-espermograma"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-colecta-s" onchange="toggleSrv('colecta-s')"><label class="cb-label" for="cb-colecta-s">Colecta y congelación</label></div>
+      <div class="servicio-campos" id="campos-colecta-s">
+        <div id="toros-colecta-s-list"></div>
+        <button class="btn-add-sub" onclick="addToroColecta()">+ Agregar toro</button>
+        <div class="selector-base" style="margin-top:12px">
+          <div class="selector-base-lbl">¿Cómo se factura esta colecta?</div>
+          <div class="radio-pills">
+            <label class="radio-pill sel" id="rpl-colecta-kgs" onclick="setColectaModo('kgs')"><input type="radio" name="colecta-modo" value="kgs" checked> Kgs cotizados × precio/kg</label>
+            <label class="radio-pill" id="rpl-colecta-paj" onclick="setColectaModo('paj')"><input type="radio" name="colecta-modo" value="paj"> Pajuelas × precio/pajuela</label>
+          </div>
+        </div>
+        <div id="panel-colecta-kgs">
+          <div class="form-row cols3">
+            <div class="form-group"><label class="lbl">Kgs/pajuela cotizados</label><input type="number" id="colecta-kgs-pajuela" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="calcColectaKgs()"></div>
+            <div class="form-group"><label class="lbl">Precio $/kg <span id="colecta-kgs-ref" class="opt"></span></label><input type="number" id="colecta-kgs-precio" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="calcColectaKgs()"></div>
+            <div class="form-group"><div class="hon-result-lbl">Total honorario</div><div class="hon-result" id="colecta-kgs-total">$ 0,00</div></div>
+          </div>
+        </div>
+        <div id="panel-colecta-paj" style="display:none">
+          <div class="form-row cols3">
+            <div class="form-group"><label class="lbl">Total pajuelas</label><input type="number" id="colecta-paj-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcColectaPaj()"></div>
+            <div class="form-group"><label class="lbl">Precio por pajuela ($)</label><input type="number" id="colecta-paj-precio" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="calcColectaPaj()"></div>
+            <div class="form-group"><div class="hon-result-lbl">Total honorario</div><div class="hon-result" id="colecta-paj-total">$ 0,00</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IATF -->
+  <div class="servicios-container" id="srv-iatf">
+    <div class="servicio-bloque">
+      <div class="cb-row"><input type="checkbox" id="cb-tacto-pre" onchange="toggleSrv('tacto-pre')"><label class="cb-label" for="cb-tacto-pre">Tacto pre servicio</label></div>
+      <div class="servicio-campos" id="campos-tacto-pre">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de animales</label><input type="number" id="tacto-pre-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('tacto-pre')"></div></div>
+        <div id="hon-tacto-pre"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-retiro" onchange="toggleSrv('retiro')"><label class="cb-label" for="cb-retiro">Retiro</label></div>
+      <div class="servicio-campos" id="campos-retiro">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de animales</label><input type="number" id="retiro-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('retiro')"></div></div>
+        <div id="hon-retiro"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-inseminacion" onchange="toggleSrv('inseminacion')"><label class="cb-label" for="cb-inseminacion">Inseminación</label></div>
+      <div class="servicio-campos" id="campos-inseminacion">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de animales</label><input type="number" id="inseminacion-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('inseminacion')"></div></div>
+        <div id="hon-inseminacion"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOROS -->
+  <div class="servicios-container" id="srv-toros">
+    <div class="servicio-bloque">
+      <div class="cb-row"><input type="checkbox" id="cb-revision" onchange="toggleSrv('revision')"><label class="cb-label" for="cb-revision">Revisación clínica</label></div>
+      <div class="servicio-campos" id="campos-revision">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad</label><input type="number" id="revision-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('revision')"></div></div>
+        <div id="hon-revision"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-sangrado-t" onchange="toggleSrv('sangrado-t')"><label class="cb-label" for="cb-sangrado-t">Sangrado</label></div>
+      <div class="servicio-campos" id="campos-sangrado-t">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad</label><input type="number" id="sangrado-t-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('sangrado-t')"></div></div>
+        <div id="hon-sangrado-t"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-raspaje" onchange="toggleSrv('raspaje')"><label class="cb-label" for="cb-raspaje">Raspaje</label></div>
+      <div class="servicio-campos" id="campos-raspaje">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad</label><input type="number" id="raspaje-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('raspaje')"></div></div>
+        <div id="hon-raspaje"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-tbc-t" onchange="toggleSrv('tbc-t')"><label class="cb-label" for="cb-tbc-t">TBC</label></div>
+      <div class="servicio-campos" id="campos-tbc-t">
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad</label><input type="number" id="tbc-t-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('tbc-t')"></div></div>
+        <div id="hon-tbc-t"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLECTA EMBRIONES (MOET) -->
+  <div class="servicios-container" id="srv-colecta">
+    <div class="servicio-bloque">
+      <div class="cb-row"><input type="checkbox" id="cb-vacas-cong" onchange="toggleSrv('vacas-cong')"><label class="cb-label" for="cb-vacas-cong">Embriones congelados</label></div>
+      <div class="servicio-campos" id="campos-vacas-cong">
+        <div class="form-row cols2">
+          <div class="form-group"><label class="lbl">Vacas lavadas</label><input type="number" id="vacas-cong-vacas" min="0" placeholder="0" inputmode="numeric"></div>
+          <div class="form-group"><label class="lbl">Embriones congelados</label><input type="number" id="vacas-cong-emb" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('vacas-cong')"></div>
+        </div>
+        <div id="hon-vacas-cong"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-vacas-fresco" onchange="toggleSrv('vacas-fresco')"><label class="cb-label" for="cb-vacas-fresco">TE en fresco</label></div>
+      <div class="servicio-campos" id="campos-vacas-fresco">
+        <div class="form-row cols2">
+          <div class="form-group"><label class="lbl">Vacas lavadas</label><input type="number" id="vacas-fresco-vacas" min="0" placeholder="0" inputmode="numeric"></div>
+          <div class="form-group"><label class="lbl">Embriones transferidos</label><input type="number" id="vacas-fresco-emb" min="0" placeholder="0" inputmode="numeric" oninput="actualizarBase('vacas-fresco')"></div>
+        </div>
+        <div class="form-row cols2"><div class="form-group"><label class="lbl">Preñeces confirmadas</label><input type="number" id="vacas-fresco-prenez" min="0" placeholder="0" inputmode="numeric" oninput="actualizarBase('vacas-fresco')"></div></div>
+        <div class="selector-base">
+          <div class="selector-base-lbl">¿Se factura por transferencia o por preñez?</div>
+          <div class="radio-pills">
+            <label class="radio-pill sel" id="rpl-vacas-fresco-transf" onclick="setBase('vacas-fresco','transf')"><input type="radio" name="base-vacas-fresco" value="transf" checked> Por transferencia</label>
+            <label class="radio-pill" id="rpl-vacas-fresco-prenez" onclick="setBase('vacas-fresco','prenez')"><input type="radio" name="base-vacas-fresco" value="prenez"> Por preñez</label>
+          </div>
+          <div class="facturando-info">Facturando sobre: <strong id="info-vacas-fresco">0 transferencias</strong></div>
+        </div>
+        <div id="hon-vacas-fresco"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSFERENCIA EMBRIONARIA -->
+  <div class="servicios-container" id="srv-transferencias">
+    <div class="servicio-bloque">
+      <div class="cb-row"><input type="checkbox" id="cb-inova" onchange="toggleSrv('inova')"><label class="cb-label" for="cb-inova">inOva y/o Geste</label></div>
+      <div class="servicio-campos" id="campos-inova">
+        <div class="form-row cols2">
+          <div class="form-group"><label class="lbl">Transferidos</label><input type="number" id="inova-transf" min="0" placeholder="0" inputmode="numeric" oninput="actualizarBase('inova')"></div>
+          <div class="form-group"><label class="lbl">Preñeces confirmadas</label><input type="number" id="inova-prenez" min="0" placeholder="0" inputmode="numeric" oninput="actualizarBase('inova')"></div>
+        </div>
+        <div class="selector-base">
+          <div class="selector-base-lbl">¿Se factura por transferencia o por preñez?</div>
+          <div class="radio-pills">
+            <label class="radio-pill sel" id="rpl-inova-transf" onclick="setBase('inova','transf')"><input type="radio" name="base-inova" value="transf" checked> Por transferencia</label>
+            <label class="radio-pill" id="rpl-inova-prenez" onclick="setBase('inova','prenez')"><input type="radio" name="base-inova" value="prenez"> Por preñez</label>
+          </div>
+          <div class="facturando-info">Facturando sobre: <strong id="info-inova">0 transferencias</strong></div>
+        </div>
+        <div id="hon-inova"></div>
+      </div>
+      <div class="cb-row"><input type="checkbox" id="cb-emb-terceros" onchange="toggleSrv('emb-terceros')"><label class="cb-label" for="cb-emb-terceros">Embriones de terceros</label></div>
+      <div class="servicio-campos" id="campos-emb-terceros">
+        <div class="form-row cols2">
+          <div class="form-group"><label class="lbl">Transferidos</label><input type="number" id="emb-terceros-transf" min="0" placeholder="0" inputmode="numeric" oninput="actualizarBase('emb-terceros')"></div>
+          <div class="form-group"><label class="lbl">Preñeces confirmadas</label><input type="number" id="emb-terceros-prenez" min="0" placeholder="0" inputmode="numeric" oninput="actualizarBase('emb-terceros')"></div>
+        </div>
+        <div class="selector-base">
+          <div class="selector-base-lbl">¿Se factura por transferencia o por preñez?</div>
+          <div class="radio-pills">
+            <label class="radio-pill sel" id="rpl-emb-terceros-transf" onclick="setBase('emb-terceros','transf')"><input type="radio" name="base-emb-terceros" value="transf" checked> Por transferencia</label>
+            <label class="radio-pill" id="rpl-emb-terceros-prenez" onclick="setBase('emb-terceros','prenez')"><input type="radio" name="base-emb-terceros" value="prenez"> Por preñez</label>
+          </div>
+          <div class="facturando-info">Facturando sobre: <strong id="info-emb-terceros">0 transferencias</strong></div>
+        </div>
+        <div id="hon-emb-terceros"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEPTORAS -->
+  <div class="servicios-container" id="srv-receptoras">
+    <div class="servicio-bloque">
+      <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de receptoras</label><input type="number" id="receptoras-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('receptoras')"></div></div>
+      <div id="hon-receptoras"></div>
+    </div>
+  </div>
+
+  <!-- ECOGRAFIA -->
+  <div class="servicios-container" id="srv-ecografia">
+    <div class="servicio-bloque">
+      <div class="form-row cols2"><div class="form-group"><label class="lbl">Cantidad de animales</label><input type="number" id="ecografia-cant" min="0" placeholder="0" inputmode="numeric" oninput="calcHon('ecografia')"></div></div>
+      <div id="hon-ecografia"></div>
+    </div>
+  </div>
+</div>
+
+<!-- VIÁTICOS -->
+<div class="card">
+  <div class="card-title">🚗 Viáticos
+    <button class="btn btn-sm btn-secondary" onclick="addViatico()" style="margin-left:auto">+ Agregar viático</button>
+  </div>
+  <div id="viaticos-list"></div>
+</div>
+
+<!-- ESTADÍSTICAS -->
+<div class="card">
+  <div class="card-title">📊 Estadísticas y observaciones <span style="font-weight:400;font-size:12px;color:var(--text3)">(todos opcionales)</span></div>
+  <div class="form-row cols4">
+    <div class="form-group"><label class="lbl">Vaca preñada grande</label><input type="number" id="est-vpg" min="0" placeholder="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="lbl">Vaca preñada chica</label><input type="number" id="est-vpc" min="0" placeholder="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="lbl">Vaca vacía</label><input type="number" id="est-vv" min="0" placeholder="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="lbl">Vaca descarte</label><input type="number" id="est-vd" min="0" placeholder="0" inputmode="numeric"></div>
+  </div>
+  <div class="form-row cols2">
+    <div class="form-group"><label class="lbl">Vaca CUT</label><input type="number" id="est-cut" min="0" placeholder="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="lbl">Notas semen congelado</label><input type="text" id="est-semen-nota" placeholder="Observaciones..."></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-sub">IATF</div>
+  <div class="form-row cols2">
+    <div class="form-group"><label class="lbl">Cantidad GNRH</label><input type="number" id="iatf-gnrh" min="0" placeholder="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="lbl">Semen utilizado</label><input type="text" id="iatf-semen" placeholder="Descripción del semen"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-sub">Toros</div>
+  <div class="form-row cols2">
+    <div class="form-group"><label class="lbl">Toros aptos</label><input type="number" id="toros-aptos" min="0" placeholder="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="lbl">Toros descarte</label><input type="number" id="toros-descarte" min="0" placeholder="0" inputmode="numeric"></div>
+  </div>
+  <div class="form-group"><label class="lbl">Comentarios toros</label><textarea id="toros-comentarios" placeholder="Observaciones sobre los toros..."></textarea></div>
+  <div class="divider"></div>
+  <div class="section-sub">Transferencias</div>
+  <div class="form-row cols2">
+    <div class="form-group"><label class="lbl">% Aprovechamiento</label><input type="number" id="transf-aprov" min="0" max="100" placeholder="0" inputmode="numeric"></div>
+  </div>
+  <div class="divider"></div>
+  <div style="margin-top:14px;border:2px solid var(--green);border-radius:var(--radius-lg);padding:14px;background:var(--green-light)">
+    <label class="lbl" style="font-size:15px;font-weight:700;color:var(--green-dark);display:block;margin-bottom:8px">📝 Observaciones generales</label>
+    <textarea id="f-obs" placeholder="Comentarios del trabajo..." style="background:var(--white);font-size:15px;min-height:90px;border-color:var(--green)"></textarea>
+  </div>
+  <!-- FOTOS -->
+  <div style="margin-top:12px">
+    <label class="lbl">Fotos del trabajo <span class="opt">(opcional — se guardan en este dispositivo)</span></label>
+    <div class="fotos-grid" id="fotos-grid">
+      <div class="foto-add-btn" onclick="document.getElementById('foto-input').click()">
+        <span class="foto-icon">📷</span>
+        <span>Agregar foto</span>
+      </div>
+    </div>
+    <input type="file" id="foto-input" accept="image/*" multiple capture="environment" style="display:none" onchange="handleFotos(event)">
+  </div>
+</div>
+
+<!-- SAVE BAR -->
+<div class="save-bar-wrap">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <button class="btn btn-danger" onclick="resetForm()">🗑 Limpiar</button>
+    <div class="save-bar">
+      <button class="btn btn-secondary" onclick="guardarOT('abierta')">💾 Guardar y dejar abierta</button>
+      <button class="btn btn-invoice" onclick="guardarOT('a-facturar')">📤 Cerrar y Enviar a Facturar</button>
+    </div>
+  </div>
+  <div class="save-hint"><strong>Guardar abierta:</strong> queda pendiente. &nbsp;|&nbsp; <strong>Cerrar y Enviar a Facturar:</strong> cierra la OT para administración.</div>
+</div>
+
+</div></div>
+
+<!-- ===== LISTA ===== -->
+<div class="page" id="page-lista">
+<div class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:8px">
+    <div class="ot-filters">
+      <button class="filter-pill active" onclick="filtrar('todas',this)">Todas</button>
+      <button class="filter-pill" onclick="filtrar('borrador',this)">Borrador</button>
+      <button class="filter-pill" onclick="filtrar('abierta',this)">Abiertas</button>
+      <button class="filter-pill" onclick="filtrar('a-facturar',this)">A Facturar</button>
+      <button class="filter-pill" onclick="filtrar('facturada',this)">Facturadas</button>
+      <button class="filter-pill" onclick="filtrar('eliminada',this)">Eliminadas</button>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="exportarExcel()">📥 Excel</button>
+  </div>
+  <div class="form-row cols2" style="margin-bottom:.8rem">
+    <div class="form-group">
+      <label class="lbl">Filtrar por veterinario</label>
+      <select id="filtro-vet" onchange="renderLista()"><option value="">— Todos —</option></select>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="ot-table-wrap">
+      <table class="ot-table">
+        <thead><tr><th>N° OT</th><th>Establecimiento</th><th>CUIT</th><th>Fecha</th><th>Tipo</th><th>Vet.</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="ot-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== DETALLE ===== -->
+<div class="page" id="page-detalle">
+<div class="container" id="detalle-container"></div>
+</div>
+
+<!-- ===== CONFIG ===== -->
+<div class="page" id="page-config">
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">💰 Valores de referencia</div>
+    <div class="info-box warn">⚠️ Todos los valores son <strong>SIN IVA</strong>. El IVA debe aplicarse en el sistema de facturación.</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem">Valores sugeridos al cargar una orden. El veterinario puede modificarlos en el momento.</p>
+    <table class="config-table">
+      <thead><tr><th>Parámetro</th><th>Valor ($)</th><th>Actualizado</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Kg INMAG</strong><div style="font-size:11px;color:var(--text3)">Precio por kilogramo — unidad INMAG</div></td><td><input type="number" id="cfg-inmag" min="0" step="0.01" placeholder="0.00" inputmode="decimal" style="max-width:150px"></td><td style="font-size:12px;color:var(--text3)" id="cfg-inmag-date">—</td></tr>
+        <tr><td><strong>Kg vaca buena</strong><div style="font-size:11px;color:var(--text3)">Precio por kilogramo — vaca buena</div></td><td><input type="number" id="cfg-vacabuena" min="0" step="0.01" placeholder="0.00" inputmode="decimal" style="max-width:150px"></td><td style="font-size:12px;color:var(--text3)" id="cfg-vacabuena-date">—</td></tr>
+        <tr><td><strong>Nafta Premium YPF</strong><div style="font-size:11px;color:var(--text3)">Precio por litro — base viáticos (× 65%)</div></td><td><input type="number" id="cfg-nafta" min="0" step="0.01" placeholder="0.00" inputmode="decimal" style="max-width:150px"></td><td style="font-size:12px;color:var(--text3)" id="cfg-nafta-date">—</td></tr>
+      </tbody>
+    </table>
+    <!-- Mobile version -->
+    <div class="config-card-mobile" style="margin-top:1rem">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div><label class="lbl">Kg INMAG</label><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Precio por kg — unidad INMAG (sin IVA)</div><input type="number" id="cfg-inmag-m" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="document.getElementById('cfg-inmag').value=this.value"><span style="font-size:11px;color:var(--text3)" id="cfg-inmag-date-m"></span></div>
+        <div><label class="lbl">Kg vaca buena</label><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Precio por kg — vaca buena (sin IVA)</div><input type="number" id="cfg-vacabuena-m" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="document.getElementById('cfg-vacabuena').value=this.value"><span style="font-size:11px;color:var(--text3)" id="cfg-vacabuena-date-m"></span></div>
+        <div><label class="lbl">Nafta Premium YPF</label><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Precio por litro — base viáticos (× 65%)</div><input type="number" id="cfg-nafta-m" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="document.getElementById('cfg-nafta').value=this.value"><span style="font-size:11px;color:var(--text3)" id="cfg-nafta-date-m"></span></div>
+      </div>
+    </div>
+    <div class="save-bar" style="margin-top:1rem"><button class="btn btn-primary" onclick="saveConfig()">💾 Guardar valores</button></div>
+  </div>
+
+  <!-- VETERINARIOS -->
+  <div class="card">
+    <div class="card-title">👨‍⚕️ Veterinarios</div>
+    <div id="vets-list" style="margin-bottom:1rem"></div>
+    <div class="form-row cols2" style="margin-bottom:8px">
+      <div class="form-group"><label class="lbl">Nombre (Apellido, Nombre)</label><input type="text" id="nuevo-vet" placeholder="Ej: García, Juan"></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="addVet()">+ Agregar</button></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="modal-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== VETERINARIOS POR DEFECTO =====
+const VETS_DEFAULT = [
+  'Barragán, Gaspar','Becker, Brian','Ben, Guillermo','Beseada, Julián',
+  'Cepeda, Juan','Dufourq, Pío','Maschwitz, Flor','Pérez M, Bauti',
+  'Polero, Tato','San Román, Lucas','Simionato, Sergio','Tossici, Cami','Witt, Fernando'
+];
+
+// ===== ESTADO GLOBAL =====
+let currentFilter = 'todas';
+let editingId = null;
+let selectedTipo = null;
+let toroCount = 0;
+let viaticoCnt = 0;
+let fotosData = []; // base64 array
+
+const TIPOS = {
+  diag:'Diagnóstico de preñez', semen:'Semen', iatf:'IATF', toros:'Toros',
+  colecta:'Colecta y Congelación (MOET)', transferencias:'Transferencia Embrionaria',
+  receptoras:'Revisación receptoras', ecografia:'Ecografía de carcasa'
+};
+const ESTADOS = {
+  borrador:{cls:'badge-borrador',label:'📝 Borrador'},
+  abierta:{cls:'badge-abierta',label:'✅ Abierta'},
+  'a-facturar':{cls:'badge-a-facturar',label:'📤 A Facturar'},
+  facturada:{cls:'badge-facturada',label:'📄 Facturada'},
+  eliminada:{cls:'badge-eliminada',label:'🗑 Eliminada'}
+};
+
+// ===== STORAGE =====
+function loadOTs(){return JSON.parse(localStorage.getItem('ta_ots')||'[]')}
+function saveOTs(d){localStorage.setItem('ta_ots',JSON.stringify(d))}
+function loadCfg(){
+  var c=JSON.parse(localStorage.getItem('ta_cfg')||'{"inmag":0,"vacabuena":0,"nafta":0}');
+  if(!c.inmag&&c.inmac){c.inmag=c.inmac;delete c.inmac;saveCfg(c);} // migración de clave antigua
+  return c;
+}
+function saveCfg(d){localStorage.setItem('ta_cfg',JSON.stringify(d))}
+function loadVets(){
+  var v=localStorage.getItem('ta_vets');
+  return v?JSON.parse(v):VETS_DEFAULT.slice();
+}
+function saveVets(v){localStorage.setItem('ta_vets',JSON.stringify(v))}
+function nextNum(){
+  var ots=loadOTs();
+  if(!ots.length)return'OT-001';
+  var m=Math.max.apply(null,ots.map(function(o){return parseInt((o.num||'OT-0').replace('OT-',''))||0;}));
+  return'OT-'+String(m+1).padStart(3,'0');
+}
+
+// ===== VET SELECTS =====
+function populateVetSelects(){
+  var vets=loadVets();
+  var opts='<option value="">— Seleccionar —</option><option value="GESTE">GESTE</option>'+
+    vets.map(function(v){return'<option value="'+v+'">'+v+'</option>';}).join('');
+  var sel=document.getElementById('f-vet');
+  if(sel)sel.innerHTML=opts;
+  // Viáticos selects
+  document.querySelectorAll('.viatico-vet-sel').forEach(function(s){
+    var cur=s.value;
+    s.innerHTML='<option value="">— Seleccionar —</option><option value="GESTE">GESTE</option>'+
+      vets.map(function(v){return'<option value="'+v+'">'+v+'</option>';}).join('');
+    s.value=cur;
+  });
+  // Filtro lista
+  var fv=document.getElementById('filtro-vet');
+  if(fv){
+    var cv=fv.value;
+    fv.innerHTML='<option value="">— Todos —</option><option value="GESTE">GESTE</option>'+
+      vets.map(function(v){return'<option value="'+v+'">'+v+'</option>';}).join('');
+    fv.value=cv;
+  }
+}
+
+// ===== ADMIN VETS =====
+function renderVets(){
+  var vets=loadVets();
+  var el=document.getElementById('vets-list');
+  if(!el)return;
+  if(!vets.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">No hay veterinarios cargados.</div>';return;}
+  el.innerHTML=vets.map(function(v,i){
+    return'<div class="vet-item"><span class="vet-nombre">'+v+'</span>'+
+      '<button class="btn-icon" onclick="removeVet('+i+')" title="Eliminar">🗑</button></div>';
+  }).join('');
+}
+function addVet(){
+  var input=document.getElementById('nuevo-vet');
+  var nombre=input.value.trim();
+  if(!nombre){toast('Ingresá el nombre');return;}
+  if(nombre.toUpperCase()==='GESTE'){toast('GESTE ya figura como opción fija en los desplegables');return;}
+  var vets=loadVets();
+  if(vets.indexOf(nombre)>=0){toast('Ya existe ese veterinario');return;}
+  vets.push(nombre);
+  vets.sort();
+  saveVets(vets);
+  input.value='';
+  renderVets();
+  populateVetSelects();
+  toast('Veterinario agregado ✓');
+}
+function removeVet(idx){
+  var vets=loadVets();
+  var nombre=vets[idx];
+  abrirModal('¿Eliminar veterinario?','Se eliminará "'+nombre+'" de la lista.',function(){
+    vets.splice(idx,1);
+    saveVets(vets);
+    renderVets();
+    populateVetSelects();
+    cerrarModal();
+    toast('Eliminado ✓');
+  });
+}
+
+// ===== NAV — fix iOS =====
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
+  var pg=document.getElementById('page-'+id);
+  if(pg)pg.classList.add('active');
+  var nb=document.getElementById('nav-'+id);
+  if(nb)nb.classList.add('active');
+  if(id==='lista'){renderLista();}
+  if(id==='config'){renderConfig();renderVets();}
+  updateBadge();
+  window.scrollTo(0,0);
+}
+function updateBadge(){document.getElementById('badge-n').textContent=loadOTs().length;}
+
+// ===== TIPO TRABAJO =====
+function selectTipo(t){
+  document.querySelectorAll('.tipo-btn').forEach(function(b){b.classList.remove('selected');});
+  document.querySelectorAll('.servicios-container').forEach(function(c){c.classList.remove('visible');});
+  if(selectedTipo===t){selectedTipo=null;return;}
+  selectedTipo=t;
+  document.getElementById('tipo-'+t).classList.add('selected');
+  document.getElementById('srv-'+t).classList.add('visible');
+}
+function toggleSrv(id){
+  var cb=document.getElementById('cb-'+id);
+  var campos=document.getElementById('campos-'+id);
+  if(cb&&campos)campos.classList.toggle('visible',cb.checked);
+}
+
+// ===== HONORARIOS =====
+var HON_STD=['tacto','sangrado-d','tbc-d','analisis','espermograma','colecta-s',
+  'tacto-pre','retiro','inseminacion','revision','sangrado-t','raspaje','tbc-t',
+  'vacas-cong','vacas-fresco','inova','emb-terceros','receptoras','ecografia'];
+
+function buildHonHTML(id){
+  var cfg=loadCfg();
+  var inmag=cfg.inmag||0;
+  var vb=cfg.vacabuena||0;
+  return '<div class="hon-box">'+
+    '<div class="hon-section-lbl">Honorarios</div>'+
+    '<div class="hon-unit-lbl">Unidad de facturación:</div>'+
+    '<div class="radio-pills">'+
+    '<label class="radio-pill" id="rpl-inmag-'+id+'" onclick="selHonTipo(\''+id+'\',\'inmag\')"><input type="radio" name="htp-'+id+'" value="inmag"> Kg INMAG</label>'+
+    '<label class="radio-pill" id="rpl-vacabuena-'+id+'" onclick="selHonTipo(\''+id+'\',\'vacabuena\')"><input type="radio" name="htp-'+id+'" value="vacabuena"> Kg Vaca buena</label>'+
+    '<label class="radio-pill" id="rpl-otro-'+id+'" onclick="selHonTipo(\''+id+'\',\'otro\')"><input type="radio" name="htp-'+id+'" value="otro"> Otro</label>'+
+    '</div>'+
+    '<div id="hon-kgs-panel-'+id+'" style="display:none">'+
+    '<div class="hon-calc-grid">'+
+    '<div class="form-group"><label class="lbl" id="lbl-kgspor-'+id+'">'+(id==='vacas-cong'?'Kgs/embrión cotizados':'Kgs/animal cotizados')+'</label><input type="number" id="hon-kgspor-'+id+'" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="calcHon(\''+id+'\')"></div>'+
+    '<div class="form-group"><label class="lbl">Total kgs</label><input type="number" id="hon-totalkgs-'+id+'" readonly placeholder="0.00"></div>'+
+    '<div class="form-group"><label class="lbl">Precio $/kg <span id="lbl-pref-'+id+'" class="opt">(ref: $'+inmag.toLocaleString('es-AR')+')</span></label><input type="number" id="hon-precio-'+id+'" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="calcHon(\''+id+'\')"></div>'+
+    '<div class="form-group"><div class="hon-result-lbl">Total honorario</div><div class="hon-result" id="hon-total-'+id+'">$ 0,00</div></div>'+
+    '</div></div>'+
+    '<div id="hon-otro-panel-'+id+'" style="display:none">'+
+    '<div class="form-row cols2">'+
+    '<div class="form-group"><label class="lbl">Importe ($)</label><input type="number" id="hon-otro-'+id+'" min="0" step="0.01" placeholder="0.00" inputmode="decimal" oninput="calcHon(\''+id+'\')"></div>'+
+    '<div class="form-group"><div class="hon-result-lbl">Total honorario</div><div class="hon-result" id="hon-total-'+id+'">$ 0,00</div></div>'+
+    '</div></div>'+
+    '</div>';
+}
+
+function selHonTipo(id,tipo){
+  var cfg=loadCfg();
+  ['inmag','vacabuena','otro'].forEach(function(t){
+    var el=document.getElementById('rpl-'+t+'-'+id);
+    if(el)el.classList.toggle('sel',t===tipo);
+  });
+  var kp=document.getElementById('hon-kgs-panel-'+id);
+  var op=document.getElementById('hon-otro-panel-'+id);
+  var pi=document.getElementById('hon-precio-'+id);
+  var pf=document.getElementById('lbl-pref-'+id);
+  var kl=document.getElementById('lbl-kgspor-'+id);
+  if(tipo==='otro'){
+    if(kp)kp.style.display='none';
+    if(op)op.style.display='block';
+  } else {
+    if(kp)kp.style.display='block';
+    if(op)op.style.display='none';
+    var rv=tipo==='inmag'?(cfg.inmag||0):(cfg.vacabuena||0);
+    if(pi)pi.value=rv;
+    if(pf)pf.textContent='(ref: $'+rv.toLocaleString('es-AR')+')';
+    var unidadLabel=id==='vacas-cong'?'Kgs/embrión cotizados':'Kgs/animal cotizados';
+    if(kl)kl.textContent=tipo==='inmag'?(unidadLabel+' (INMAG)'):(unidadLabel+' (Vaca buena)');
+  }
+  calcHon(id);
+}
+
+function getCant(id){
+  var conBase=['vacas-fresco','inova','emb-terceros'];
+  if(conBase.indexOf(id)>=0){
+    var radio=document.querySelector('input[name="base-'+id+'"]:checked');
+    var base=radio?radio.value:'transf';
+    var mapT={'vacas-fresco':'vacas-fresco-emb','inova':'inova-transf','emb-terceros':'emb-terceros-transf'};
+    var mapP={'vacas-fresco':'vacas-fresco-prenez','inova':'inova-prenez','emb-terceros':'emb-terceros-prenez'};
+    var fid=base==='prenez'?mapP[id]:mapT[id];
+    return parseFloat((document.getElementById(fid)||{}).value)||0;
+  }
+  var map={tacto:'tacto-cant','sangrado-d':'sangrado-d-cant','tbc-d':'tbc-d-cant',
+    analisis:'analisis-cant',espermograma:'espermograma-cant',
+    'tacto-pre':'tacto-pre-cant',retiro:'retiro-cant',inseminacion:'inseminacion-cant',
+    revision:'revision-cant','sangrado-t':'sangrado-t-cant',raspaje:'raspaje-cant','tbc-t':'tbc-t-cant',
+    'vacas-cong':'vacas-cong-emb',receptoras:'receptoras-cant',ecografia:'ecografia-cant'};
+  var fid=map[id];
+  return fid?(parseFloat((document.getElementById(fid)||{}).value)||0):0;
+}
+
+function calcHon(id){
+  var radio=document.querySelector('input[name="htp-'+id+'"]:checked');
+  if(!radio)return;
+  var totalEl=document.getElementById('hon-total-'+id);
+  if(!totalEl)return;
+  if(radio.value==='otro'){
+    var imp=parseFloat((document.getElementById('hon-otro-'+id)||{}).value)||0;
+    totalEl.textContent='$ '+fmt(imp);return;
+  }
+  var cant=getCant(id);
+  var kgsEl=document.getElementById('hon-kgspor-'+id);
+  var tkEl=document.getElementById('hon-totalkgs-'+id);
+  var prEl=document.getElementById('hon-precio-'+id);
+  var kgs=parseFloat((kgsEl||{}).value)||0;
+  var tk=cant*kgs;
+  if(tkEl)tkEl.value=tk.toFixed(2);
+  var pr=parseFloat((prEl||{}).value)||0;
+  totalEl.textContent='$ '+fmt(tk*pr);
+}
+
+function setBase(id,base){
+  ['transf','prenez'].forEach(function(b){
+    var el=document.getElementById('rpl-'+id+'-'+b);
+    if(el)el.classList.toggle('sel',b===base);
+    var radio=document.querySelector('input[name="base-'+id+'"][value="'+b+'"]');
+    if(radio)radio.checked=(b===base);
+  });
+  actualizarBase(id);
+}
+function actualizarBase(id){
+  var radio=document.querySelector('input[name="base-'+id+'"]:checked');
+  var base=radio?radio.value:'transf';
+  var mapT={'vacas-fresco':'vacas-fresco-emb','inova':'inova-transf','emb-terceros':'emb-terceros-transf'};
+  var mapP={'vacas-fresco':'vacas-fresco-prenez','inova':'inova-prenez','emb-terceros':'emb-terceros-prenez'};
+  var fid=base==='prenez'?mapP[id]:mapT[id];
+  var cant=parseFloat((document.getElementById(fid)||{}).value)||0;
+  var infoEl=document.getElementById('info-'+id);
+  if(infoEl)infoEl.textContent=cant+' '+(base==='prenez'?'preñeces':'transferencias');
+  calcHon(id);
+}
+function setColectaModo(modo){
+  document.getElementById('rpl-colecta-kgs').classList.toggle('sel',modo==='kgs');
+  document.getElementById('rpl-colecta-paj').classList.toggle('sel',modo==='paj');
+  var r=document.querySelector('input[name="colecta-modo"][value="'+modo+'"]');
+  if(r)r.checked=true;
+  document.getElementById('panel-colecta-kgs').style.display=modo==='kgs'?'block':'none';
+  document.getElementById('panel-colecta-paj').style.display=modo==='paj'?'block':'none';
+  if(modo==='kgs'){
+    var cfg=loadCfg();
+    var pr=document.getElementById('colecta-kgs-precio');
+    if(pr&&!pr.value&&cfg.inmag)pr.value=cfg.inmag;
+    var ref=document.getElementById('colecta-kgs-ref');
+    if(ref&&cfg.inmag)ref.textContent='(ref: $'+cfg.inmag+')';
+  }
+}
+function calcColectaKgs(){
+  var kgs=parseFloat((document.getElementById('colecta-kgs-pajuela')||{}).value)||0;
+  var pr=parseFloat((document.getElementById('colecta-kgs-precio')||{}).value)||0;
+  var el=document.getElementById('colecta-kgs-total');
+  if(el)el.textContent='$ '+fmt(kgs*pr);
+}
+function calcColectaPaj(){
+  var paj=parseFloat((document.getElementById('colecta-paj-cant')||{}).value)||0;
+  var pr=parseFloat((document.getElementById('colecta-paj-precio')||{}).value)||0;
+  var el=document.getElementById('colecta-paj-total');
+  if(el)el.textContent='$ '+fmt(paj*pr);
+}
+
+HON_STD.forEach(function(id){
+  var el=document.getElementById('hon-'+id);
+  if(el)el.innerHTML=buildHonHTML(id);
+});
+
+// ===== TOROS SEMEN =====
+function addToroColecta(){
+  var container=document.getElementById('toros-colecta-s-list');
+  var idx=++toroCount;
+  var div=document.createElement('div');
+  div.className='toro-row';div.id='toro-'+idx;
+  div.innerHTML='<div class="form-group"><label class="lbl">Toro #'+idx+' — Nombre/RP</label><input type="text" id="toro-nom-'+idx+'" placeholder="Identificación"></div>'+
+    '<div class="form-group"><label class="lbl">Pajuelas</label><input type="number" id="toro-paj-'+idx+'" min="0" placeholder="0" inputmode="numeric"></div>'+
+    '<button class="btn-icon" onclick="this.parentElement.remove()" title="Eliminar">✕</button>';
+  container.appendChild(div);
+}
+
+// ===== VIÁTICOS =====
+function addViatico(data){
+  var cfg=loadCfg();
+  var vets=loadVets();
+  var idx=++viaticoCnt;
+  var container=document.getElementById('viaticos-list');
+  var div=document.createElement('div');
+  div.className='viatico-item';
+  div.id='viatico-'+idx;
+  var facturado=data&&data.facturado;
+  if(facturado){div.classList.add('facturado');}
+  var vetOpts='<option value="">— Seleccionar —</option><option value="GESTE">GESTE</option>'+
+    vets.map(function(v){return'<option value="'+v+'"'+(data&&data.movil===v?' selected':'')+'>'+v+'</option>';}).join('');
+  var vetOpts2='<option value="">— Seleccionar —</option><option value="GESTE">GESTE</option>'+
+    vets.map(function(v){return'<option value="'+v+'"'+(data&&data.vet===v?' selected':'')+'>'+v+'</option>';}).join('');
+  div.innerHTML=(facturado?'<div class="viatico-facturado-badge">📤 Viático facturado</div>':'')+
+    '<div class="form-row cols3">'+
+    '<div class="form-group"><label class="lbl">Veterinario</label><select class="viatico-vet-sel" id="viat-vet-'+idx+'">'+vetOpts2+'</select></div>'+
+    '<div class="form-group"><label class="lbl">Móvil de</label><select id="viat-movil-'+idx+'">'+vetOpts+'</select></div>'+
+    '<div class="form-group"><label class="lbl">Fecha <span class="opt">(opcional)</span></label><input type="text" id="viat-fecha-'+idx+'" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" value="'+(data&&data.fecha?data.fecha:'')+'" oninput="maskDate(this)"></div>'+
+    '</div>'+
+    '<div class="form-row cols3">'+
+    '<div class="form-group"><label class="lbl">KMS IDA</label><input type="number" id="viat-km-'+idx+'" min="0" placeholder="0" inputmode="numeric" value="'+(data&&data.km?data.km:'')+'" oninput="calcViatico('+idx+')"></div>'+
+    '<div class="form-group"><label class="lbl">Nafta $/L <span id="viat-ref-lbl-'+idx+'" class="opt"></span></label><input type="number" id="viat-nafta-'+idx+'" min="0" step="0.01" placeholder="0.00" inputmode="decimal" value="'+(data&&data.nafta?data.nafta:cfg.nafta||'')+'" oninput="calcViatico('+idx+')"></div>'+
+    '<div class="form-group"><div class="hon-result-lbl">Total viático ($)</div><div class="hon-result" id="viat-total-'+idx+'" style="font-size:16px">'+((data&&data.total)?'$ '+fmt(data.total):'$ 0,00')+'</div><span class="viatico-nota">KMS IDA × $/L × 65%</span></div>'+
+    '</div>'+
+    (!facturado?
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">'+
+    '<button class="btn btn-sm btn-danger" onclick="removeViatico('+idx+')">🗑 Quitar</button>'+
+    ((selectedTipo==='colecta'||selectedTipo==='transferencias')?
+    '<button class="btn btn-sm btn-warning" onclick="facturarViatico('+idx+')">📤 A Facturar</button>':'')+'</div>':'');
+  container.appendChild(div);
+  if(data&&data.km)calcViatico(idx);
+  // Set ref label
+  if(cfg.nafta){var rl=document.getElementById('viat-ref-lbl-'+idx);if(rl)rl.textContent='(ref: $'+cfg.nafta+')';}
+}
+
+function calcViatico(idx){
+  var km=parseFloat((document.getElementById('viat-km-'+idx)||{}).value)||0;
+  var nafta=parseFloat((document.getElementById('viat-nafta-'+idx)||{}).value)||0;
+  var total=km*nafta*0.65;
+  var tot=document.getElementById('viat-total-'+idx);
+  if(tot)tot.textContent='$ '+fmt(total);
+  // Guardar valor en dataset para poder leerlo al guardar
+  if(tot)tot.dataset.val=total.toFixed(2);
+}
+function removeViatico(idx){
+  var el=document.getElementById('viatico-'+idx);
+  if(el)el.remove();
+}
+function facturarViatico(idx){
+  abrirModal('¿Enviar viático a facturar?',
+    'Este viático se marcará como facturado y quedará grisado. La OT continuará abierta para los demás servicios.',
+    function(){
+      var el=document.getElementById('viatico-'+idx);
+      if(el){
+        el.classList.add('facturado');
+        el.innerHTML='<div class="viatico-facturado-badge">📤 Viático facturado</div>'+el.innerHTML;
+        el.querySelectorAll('button').forEach(function(b){b.remove();});
+      }
+      cerrarModal();
+      toast('Viático marcado como facturado ✓');
+    });
+}
+
+function leerViaticos(){
+  var viaticos=[];
+  var items=document.querySelectorAll('.viatico-item');
+  items.forEach(function(item){
+    var idx=item.id.replace('viatico-','');
+    var facturado=item.classList.contains('facturado');
+    var vet=(document.getElementById('viat-vet-'+idx)||{}).value||'';
+    var movil=(document.getElementById('viat-movil-'+idx)||{}).value||'';
+    var fecha=(document.getElementById('viat-fecha-'+idx)||{}).value||'';
+    var km=parseFloat((document.getElementById('viat-km-'+idx)||{}).value)||0;
+    var nafta=parseFloat((document.getElementById('viat-nafta-'+idx)||{}).value)||0;
+    var totEl=document.getElementById('viat-total-'+idx);
+    var total=parseFloat((totEl&&totEl.dataset.val)||0)||0;
+    viaticos.push({vet,movil,fecha,km,nafta,total,facturado});
+  });
+  return viaticos;
+}
+
+// ===== FOTOS =====
+function handleFotos(event){
+  var files=Array.from(event.target.files);
+  files.forEach(function(file){
+    if(!file.type.startsWith('image/'))return;
+    var reader=new FileReader();
+    reader.onload=function(e){
+      fotosData.push(e.target.result);
+      renderFotos();
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value='';
+}
+function renderFotos(){
+  var grid=document.getElementById('fotos-grid');
+  if(!grid)return;
+  // Limpiar thumbs anteriores (no el botón add)
+  grid.querySelectorAll('.foto-thumb').forEach(function(t){t.remove();});
+  fotosData.forEach(function(src,i){
+    var div=document.createElement('div');
+    div.className='foto-thumb';
+    div.innerHTML='<img src="'+src+'" alt="Foto '+(i+1)+'"><button class="foto-del" onclick="eliminarFoto('+i+')">✕</button>';
+    grid.insertBefore(div,grid.querySelector('.foto-add-btn'));
+  });
+}
+function eliminarFoto(idx){
+  fotosData.splice(idx,1);
+  renderFotos();
+}
+
+// ===== LEER HONORARIO =====
+function leerHon(id){
+  var radio=document.querySelector('input[name="htp-'+id+'"]:checked');
+  if(!radio)return{tipo:'',total:0,kgsPor:0,totalKgs:0,precio:0};
+  var tipo=radio.value;
+  if(tipo==='otro'){
+    var imp=parseFloat((document.getElementById('hon-otro-'+id)||{}).value)||0;
+    return{tipo:'otro',total:imp,kgsPor:0,totalKgs:0,precio:imp};
+  }
+  var kgsPor=parseFloat((document.getElementById('hon-kgspor-'+id)||{}).value)||0;
+  var totalKgs=parseFloat((document.getElementById('hon-totalkgs-'+id)||{}).value)||0;
+  var precio=parseFloat((document.getElementById('hon-precio-'+id)||{}).value)||0;
+  return{tipo,kgsPor,totalKgs,precio,total:totalKgs*precio};
+}
+
+// ===== HELPERS =====
+function v(id){var el=document.getElementById(id);return el?el.value:'';}
+function n(id){return parseFloat(v(id))||0;}
+function cb(id){var el=document.getElementById('cb-'+id);return el&&el.checked;}
+function fmt(x){return x.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtF(f){if(!f)return'—';if(f.indexOf('/')>=0)return f;var p=f.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:f;}
+function badgeHtml(e){var s=ESTADOS[e]||ESTADOS.borrador;return'<span class="badge '+s.cls+'">'+s.label+'</span>';}
+
+// ===== GUARDAR OT =====
+function guardarOT(estadoDestino){
+  // Validaciones
+  var estab=v('f-estab').trim();
+  var dueno=v('f-dueno').trim();
+  var cuit=v('f-cuit').trim();
+  if(!estab&&!dueno){toast('Completá al menos Establecimiento o Dueño/Razón Social');return;}
+  if(!cuit){toast('El CUIT a facturar es obligatorio');return;}
+  if(!selectedTipo){toast('Seleccioná un tipo de trabajo');return;}
+  if(editingId){
+    var otExistente=loadOTs().find(function(o){return o.id===editingId;});
+    if(otExistente&&(otExistente.estado==='facturada'||otExistente.estado==='eliminada')){
+      toast('Esta OT no es editable');resetForm();showPage('lista');return;
+    }
+  }
+
+  var servicios=[];
+  if(selectedTipo==='diag'){
+    if(cb('tacto'))servicios.push({nombre:'Tacto/Ecografía',cantidad:n('tacto-cant'),honorario:leerHon('tacto')});
+    if(cb('sangrado-d'))servicios.push({nombre:'Sangrado',cantidad:n('sangrado-d-cant'),honorario:leerHon('sangrado-d')});
+    if(cb('tbc-d'))servicios.push({nombre:'TBC',cantidad:n('tbc-d-cant'),honorario:leerHon('tbc-d')});
+  }
+  if(selectedTipo==='semen'){
+    if(cb('analisis'))servicios.push({nombre:'Análisis de semen',cantidad:n('analisis-cant'),honorario:leerHon('analisis')});
+    if(cb('espermograma'))servicios.push({nombre:'Espermograma',cantidad:n('espermograma-cant'),honorario:leerHon('espermograma')});
+    if(cb('colecta-s')){
+      var modoR=document.querySelector('input[name="colecta-modo"]:checked');
+      var modo=modoR?modoR.value:'kgs';
+      var toros=[];
+      for(var i=1;i<=toroCount;i++){
+        var nom=v('toro-nom-'+i);var paj=n('toro-paj-'+i);
+        if(document.getElementById('toro-'+i)&&(nom||paj))toros.push({nombre:nom,pajuelas:paj});
+      }
+      if(modo==='paj'){
+        var tp=n('colecta-paj-cant'),pp=n('colecta-paj-precio');
+        servicios.push({nombre:'Colecta y congelación',modo:'pajuelas',toros,honorario:{tipo:'pajuelas',totalPajuelas:tp,precioPajuela:pp,total:tp*pp}});
+      } else {
+        var ckgs=parseFloat((document.getElementById('colecta-kgs-pajuela')||{}).value)||0;
+        var cpr=parseFloat((document.getElementById('colecta-kgs-precio')||{}).value)||0;
+        servicios.push({nombre:'Colecta y congelación',modo:'kgs',toros,
+          honorario:{tipo:'kgs/pajuela',kgsPajuela:ckgs,precio:cpr,total:ckgs*cpr}});
+      }
+    }
+  }
+  if(selectedTipo==='iatf'){
+    if(cb('tacto-pre'))servicios.push({nombre:'Tacto pre servicio',cantidad:n('tacto-pre-cant'),honorario:leerHon('tacto-pre')});
+    if(cb('retiro'))servicios.push({nombre:'Retiro',cantidad:n('retiro-cant'),honorario:leerHon('retiro')});
+    if(cb('inseminacion'))servicios.push({nombre:'Inseminación',cantidad:n('inseminacion-cant'),honorario:leerHon('inseminacion')});
+  }
+  if(selectedTipo==='toros'){
+    if(cb('revision'))servicios.push({nombre:'Revisación clínica',cantidad:n('revision-cant'),honorario:leerHon('revision')});
+    if(cb('sangrado-t'))servicios.push({nombre:'Sangrado',cantidad:n('sangrado-t-cant'),honorario:leerHon('sangrado-t')});
+    if(cb('raspaje'))servicios.push({nombre:'Raspaje',cantidad:n('raspaje-cant'),honorario:leerHon('raspaje')});
+    if(cb('tbc-t'))servicios.push({nombre:'TBC',cantidad:n('tbc-t-cant'),honorario:leerHon('tbc-t')});
+  }
+  if(selectedTipo==='colecta'){
+    if(cb('vacas-cong'))servicios.push({nombre:'Embriones congelados',vacasLavadas:n('vacas-cong-vacas'),embriones:n('vacas-cong-emb'),honorario:leerHon('vacas-cong')});
+    if(cb('vacas-fresco')){
+      var bvf=(document.querySelector('input[name="base-vacas-fresco"]:checked')||{value:'transf'}).value;
+      servicios.push({nombre:'TE en fresco',vacasLavadas:n('vacas-fresco-vacas'),embriones:n('vacas-fresco-emb'),preneces:n('vacas-fresco-prenez'),baseFacturacion:bvf,cantFacturada:getCant('vacas-fresco'),honorario:leerHon('vacas-fresco')});
+    }
+  }
+  if(selectedTipo==='transferencias'){
+    if(cb('inova')){
+      var bi=(document.querySelector('input[name="base-inova"]:checked')||{value:'transf'}).value;
+      servicios.push({nombre:'inOva/Geste',transferidos:n('inova-transf'),preneces:n('inova-prenez'),baseFacturacion:bi,cantFacturada:getCant('inova'),honorario:leerHon('inova')});
+    }
+    if(cb('emb-terceros')){
+      var be=(document.querySelector('input[name="base-emb-terceros"]:checked')||{value:'transf'}).value;
+      servicios.push({nombre:'Embriones de terceros',transferidos:n('emb-terceros-transf'),preneces:n('emb-terceros-prenez'),baseFacturacion:be,cantFacturada:getCant('emb-terceros'),honorario:leerHon('emb-terceros')});
+    }
+  }
+  if(selectedTipo==='receptoras')servicios.push({nombre:'Revisación receptoras',cantidad:n('receptoras-cant'),honorario:leerHon('receptoras')});
+  if(selectedTipo==='ecografia')servicios.push({nombre:'Ecografía de carcasa',cantidad:n('ecografia-cant'),honorario:leerHon('ecografia')});
+
+  var totalHon=servicios.reduce(function(s,srv){return s+(srv.honorario?srv.honorario.total:0);},0);
+  var viatsList=leerViaticos();
+  var totalViats=viatsList.filter(function(vt){return!vt.facturado;}).reduce(function(s,vt){return s+vt.total;},0);
+
+  var ots=loadOTs();
+  var exist=editingId?ots.find(function(o){return o.id===editingId;}):null;
+  var ot={
+    id:editingId||Date.now().toString(),
+    num:exist?exist.num:nextNum(),
+    establecimiento:estab,dueno:dueno,cuit:cuit,contacto:v('f-contacto'),
+    fecha:v('f-fecha'),veterinario:v('f-vet'),
+    estado:estadoDestino,tipo:selectedTipo,tipoLabel:TIPOS[selectedTipo]||selectedTipo,
+    servicios,totalHon,viaticos:viatsList,totalViats,
+    fotos:fotosData.slice(),
+    estadisticas:{vpg:n('est-vpg'),vpc:n('est-vpc'),vv:n('est-vv'),vd:n('est-vd'),cut:n('est-cut'),
+      semenNota:v('est-semen-nota'),gnrh:n('iatf-gnrh'),semenUtil:v('iatf-semen'),
+      torosAptos:n('toros-aptos'),torosDescarte:n('toros-descarte'),torosComent:v('toros-comentarios'),
+      transfAprov:n('transf-aprov')},
+    obs:v('f-obs'),
+    creado:exist?exist.creado:new Date().toISOString(),
+    actualizado:new Date().toISOString(),
+  };
+
+  if(editingId){
+    var idx2=ots.findIndex(function(o){return o.id===editingId;});
+    if(idx2>=0)ots[idx2]=ot; else ots.push(ot);
+  } else {
+    ots.push(ot);
+  }
+  saveOTs(ots);
+  toast('Orden '+ot.num+(estadoDestino==='a-facturar'?' enviada a facturar':' guardada')+' ✓');
+  resetForm();updateBadge();showPage('lista');
+}
+
+// ===== RESET =====
+function resetForm(){
+  editingId=null;selectedTipo=null;toroCount=0;viaticoCnt=0;fotosData=[];
+  document.querySelectorAll('.tipo-btn').forEach(function(b){b.classList.remove('selected');});
+  document.querySelectorAll('.servicios-container').forEach(function(c){c.classList.remove('visible');});
+  document.querySelectorAll('input:not([readonly]),textarea').forEach(function(el){
+    if(el.type==='date')el.value=new Date().toISOString().slice(0,10);
+    else if(el.type==='radio')el.checked=el.defaultChecked;
+    else if(el.type==='checkbox')el.checked=false;
+    else el.value='';
+  });
+  document.querySelectorAll('select').forEach(function(el){el.selectedIndex=0;});
+  document.querySelectorAll('.servicio-campos').forEach(function(c){c.classList.remove('visible');});
+  var tcl=document.getElementById('toros-colecta-s-list');if(tcl)tcl.innerHTML='';
+  document.getElementById('viaticos-list').innerHTML='';
+  renderFotos();
+  document.querySelectorAll('.radio-pill').forEach(function(p){p.classList.remove('sel');});
+  var rck=document.getElementById('rpl-colecta-kgs');if(rck)rck.classList.add('sel');
+  ['vacas-fresco','inova','emb-terceros'].forEach(function(id){
+    var el=document.getElementById('rpl-'+id+'-transf');if(el)el.classList.add('sel');
+    var info=document.getElementById('info-'+id);if(info)info.textContent='0 transferencias';
+  });
+  document.getElementById('panel-colecta-kgs').style.display='block';
+  document.getElementById('panel-colecta-paj').style.display='none';
+  HON_STD.forEach(function(id){var el=document.getElementById('hon-'+id);if(el)el.innerHTML=buildHonHTML(id);});
+  document.querySelectorAll('[id^="hon-kgs-panel-"],[id^="hon-otro-panel-"]').forEach(function(el){el.style.display='none';});
+  var badge=document.getElementById('f-estado-badge');
+  if(badge){badge.className='badge badge-borrador';badge.textContent='📝 Borrador';}
+  document.getElementById('f-fecha').value=fmtFHoy();
+  loadNaftaRef();
+  // Agregar un viático vacío por defecto
+  addViatico();
+}
+
+function loadNaftaRef(){
+  var cfg=loadCfg();
+  if(cfg.nafta){
+    // Para los selects de viáticos ya cargados
+    for(var i=1;i<=viaticoCnt;i++){
+      var el=document.getElementById('viat-nafta-'+i);
+      if(el&&!el.value)el.value=cfg.nafta;
+    }
+  }
+}
+
+document.getElementById('f-fecha').value=fmtFHoy();
+populateVetSelects();
+addViatico(); // viático inicial
+
+// ===== LISTA =====
+function filtrar(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.remove('active');});
+  btn.classList.add('active');
+  renderLista();
+}
+
+function renderLista(){
+  var filtroVet=(document.getElementById('filtro-vet')||{}).value||'';
+  var ots=loadOTs();
+  if(currentFilter!=='todas')ots=ots.filter(function(o){return o.estado===currentFilter;});
+  if(filtroVet)ots=ots.filter(function(o){return o.veterinario===filtroVet;});
+  ots=ots.slice().sort(function(a,b){return new Date(b.creado)-new Date(a.creado);});
+  var tbody=document.getElementById('ot-tbody');
+  if(!ots.length){tbody.innerHTML='<tr><td colspan="8" class="empty-state">No hay órdenes de trabajo</td></tr>';return;}
+  tbody.innerHTML=ots.map(function(ot){
+    var elim=ot.estado==='eliminada';
+    var editable=ot.estado==='borrador'||ot.estado==='abierta'||ot.estado==='a-facturar';
+    return'<tr>'+
+      '<td class="ot-num">'+ot.num+'</td>'+
+      '<td>'+(ot.establecimiento||ot.dueno||'—')+'</td>'+
+      '<td style="font-size:12px">'+(ot.cuit||'—')+'</td>'+
+      '<td>'+(ot.fecha?fmtF(ot.fecha):'—')+'</td>'+
+      '<td style="font-size:11px">'+(ot.tipoLabel||ot.tipo||'—')+'</td>'+
+      '<td style="font-size:12px">'+(ot.veterinario||'—')+'</td>'+
+      '<td>'+badgeHtml(ot.estado)+'</td>'+
+      '<td style="white-space:nowrap">'+
+        '<button class="link-btn" onclick="verDetalle(\''+ot.id+'\')">Ver</button>'+
+        (!elim&&editable?'<button class="link-btn" onclick="editarOT(\''+ot.id+'\')" style="margin-left:8px">Editar</button>':'')+
+        (!elim&&ot.estado!=='facturada'?'<button class="btn-icon" onclick="eliminarDesdeTabla(\''+ot.id+'\')" title="Eliminar" style="color:var(--red)">🗑</button>':'')+
+      '</td></tr>';
+  }).join('');
+}
+
+// ===== DETALLE =====
+function verDetalle(id){
+  var ot=loadOTs().find(function(o){return o.id===id;});
+  if(!ot)return;
+  var elim=ot.estado==='eliminada';
+  var editable=ot.estado==='borrador'||ot.estado==='abierta'||ot.estado==='a-facturar';
+
+  var srvHtml=(ot.servicios||[]).map(function(s){
+    var h=s.honorario||{};
+    var honDesc=h.tipo==='pajuelas'?h.totalPajuelas+' paj. × $'+h.precioPajuela:
+      h.tipo==='otro'?'monto fijo':
+      h.tipo?(h.tipo+' · '+(h.totalKgs||0)+' kgs × $'+(h.precio||0)+'/kg'):'';
+    var cant=s.cantFacturada!=null?s.cantFacturada:(s.cantidad!=null?s.cantidad:(s.transferidos!=null?s.transferidos:(s.embriones||'')));
+    return'<div class="srv-item"><div class="srv-item-nombre">'+s.nombre+'</div>'+
+      (cant>0?'<div class="srv-item-row"><span>Cantidad</span><span>'+cant+'</span></div>':'')+
+      (s.baseFacturacion?'<div class="srv-item-row"><span>Base</span><span>Por '+(s.baseFacturacion==='prenez'?'preñez ('+s.cantFacturada+')':'transferencia ('+s.cantFacturada+')')+'</span></div>':'')+
+      (h.total>0?'<div class="srv-item-row" style="font-weight:700;margin-top:4px"><span>Honorario '+(honDesc?'('+honDesc+')':'')+'</span><span style="color:var(--green)">$ '+fmt(h.total)+'</span></div>':'')+
+    '</div>';
+  }).join('')||'<div style="color:var(--text3);font-size:13px">Sin servicios</div>';
+
+  var viatsHtml=(ot.viaticos||[]).map(function(vt){
+    return'<div class="srv-item"'+(vt.facturado?' style="opacity:.5"':'')+'>'+
+      (vt.facturado?'<div class="viatico-facturado-badge">📤 Facturado</div>':'')+
+      '<div class="srv-item-row"><span>Vet.</span><span>'+(vt.vet||'—')+'</span></div>'+
+      '<div class="srv-item-row"><span>Móvil de</span><span>'+(vt.movil||'—')+'</span></div>'+
+      (vt.fecha?'<div class="srv-item-row"><span>Fecha</span><span>'+fmtF(vt.fecha)+'</span></div>':'')+
+      '<div class="srv-item-row"><span>Km</span><span>'+(vt.km||0)+' km</span></div>'+
+      '<div class="srv-item-row" style="font-weight:700"><span>Total</span><span style="color:var(--green)">$ '+fmt(vt.total||0)+'</span></div>'+
+    '</div>';
+  }).join('')||'<div style="color:var(--text3);font-size:13px">Sin viáticos</div>';
+
+  var fotosHtml=(ot.fotos&&ot.fotos.length)?
+    '<div class="fotos-grid">'+ot.fotos.map(function(src,i){return'<div class="foto-thumb"><img src="'+src+'" alt="Foto '+(i+1)+'" onclick="verFoto(\''+id+'\','+i+')" style="cursor:pointer"></div>';}).join('')+'</div>':'';
+
+  var flows={
+    borrador:[{e:'abierta',l:'✅ Marcar Abierta'},{e:'a-facturar',l:'📤 Enviar a Facturar'}],
+    abierta:[{e:'a-facturar',l:'📤 Enviar a Facturar'},{e:'borrador',l:'📝 Volver a Borrador'}],
+    'a-facturar':[{e:'facturada',l:'📄 Marcar como Facturada'},{e:'abierta',l:'✅ Reabrir'}],
+    facturada:[],eliminada:[]
+  };
+  var flowBtns=(flows[ot.estado]||[]).map(function(f){
+    return'<button class="btn btn-secondary btn-sm" onclick="cambiarEstado(\''+ot.id+'\',\''+f.e+'\')">'+f.l+'</button>';
+  }).join('');
+  var elimBtn=(!elim&&ot.estado!=='facturada')?
+    '<button class="btn btn-danger btn-sm" onclick="confirmarEliminar(\''+ot.id+'\')">🗑 Marcar eliminada</button>':'';
+
+  document.getElementById('detalle-container').innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap">'+
+    '<button class="btn btn-secondary btn-sm" onclick="showPage(\'lista\')">← Volver</button>'+
+    '<div style="font-size:15px;font-weight:700;flex:1">'+ot.num+' — '+(ot.establecimiento||ot.dueno||'Sin nombre')+'</div>'+
+    badgeHtml(ot.estado)+'</div>'+
+    '<div class="card"><div class="card-title">📋 Datos generales</div>'+
+    '<div class="detail-grid">'+
+    '<div class="detail-field"><div class="dl">Establecimiento</div><div class="dv">'+(ot.establecimiento||'—')+'</div></div>'+
+    '<div class="detail-field"><div class="dl">Dueño</div><div class="dv">'+(ot.dueno||'—')+'</div></div>'+
+    '<div class="detail-field"><div class="dl">CUIT</div><div class="dv">'+(ot.cuit||'—')+'</div></div>'+
+    '<div class="detail-field"><div class="dl">Contacto</div><div class="dv">'+(ot.contacto||'—')+'</div></div>'+
+    '<div class="detail-field"><div class="dl">Fecha</div><div class="dv">'+fmtF(ot.fecha)+'</div></div>'+
+    '<div class="detail-field"><div class="dl">Veterinario</div><div class="dv">'+(ot.veterinario||'—')+'</div></div>'+
+    '<div class="detail-field"><div class="dl">Tipo</div><div class="dv">'+(ot.tipoLabel||ot.tipo)+'</div></div>'+
+    '<div class="detail-field"><div class="dl">Creada</div><div class="dv">'+new Date(ot.creado).toLocaleDateString('es-AR')+'</div></div>'+
+    '</div>'+(ot.obs?'<div style="padding:10px;background:var(--bg);border-radius:var(--radius);font-size:13px;margin-top:8px"><strong>Obs:</strong> '+ot.obs+'</div>':'')+
+    '</div>'+
+    '<div class="card"><div class="card-title">🔬 Servicios</div>'+srvHtml+
+    '<div class="total-box"><div class="total-label">Total honorarios</div><div class="total-val">$ '+fmt(ot.totalHon||0)+'</div></div></div>'+
+    '<div class="card"><div class="card-title">🚗 Viáticos</div>'+viatsHtml+
+    '<div style="margin-top:8px;font-size:13px;font-weight:600;color:var(--green)">Total viáticos no facturados: $ '+fmt(ot.totalViats||0)+'</div></div>'+
+    (fotosHtml?'<div class="card"><div class="card-title">📷 Fotos</div>'+fotosHtml+'</div>':'')+
+    (!elim?'<div class="card"><div class="card-title">⚙️ Cambiar estado</div>'+
+    '<div class="flow-row">'+(flowBtns||'<span style="font-size:13px;color:var(--text3)">Estado final</span>')+elimBtn+'</div></div>'+
+    '<div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap">'+
+    (editable?'<button class="btn btn-secondary" onclick="editarOT(\''+ot.id+'\')">✏️ Editar</button>':'')+
+    '<button class="btn btn-secondary" onclick="imprimirOT(\''+ot.id+'\')">🖨 Imprimir</button>'+
+    '</div>':'<div class="card"><div style="font-size:13px;color:var(--text2)">🗑 Orden eliminada — solo visualización.</div></div>');
+
+  showPage('detalle');
+}
+
+function verFoto(otId,idx){
+  var ot=loadOTs().find(function(o){return o.id===otId;});
+  if(!ot||!ot.fotos||!ot.fotos[idx])return;
+  var win=window.open('','_blank');
+  win.document.write('<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+ot.fotos[idx]+'" style="max-width:100%;max-height:100vh"></body></html>');
+}
+
+function cambiarEstado(id,estado){
+  var ots=loadOTs();var ot=ots.find(function(o){return o.id===id;});
+  if(!ot)return;
+  ot.estado=estado;ot.actualizado=new Date().toISOString();
+  saveOTs(ots);
+  toast('Estado: '+(ESTADOS[estado]?ESTADOS[estado].label:estado)+' ✓');
+  verDetalle(id);
+}
+function confirmarEliminar(id){
+  var ot=loadOTs().find(function(o){return o.id===id;});if(!ot)return;
+  abrirModal('¿Marcar como eliminada?','La orden '+ot.num+' quedará eliminada. Seguirá visible en el listado.',function(){
+    cambiarEstado(id,'eliminada');cerrarModal();
+  });
+}
+function eliminarDesdeTabla(id){
+  var ots=loadOTs();var ot=ots.find(function(o){return o.id===id;});if(!ot)return;
+  var esCerrada=ot.estado==='a-facturar';
+  var msg=esCerrada?
+    'Usted está por eliminar una orden de trabajo cerrada y no facturada. ¿Quiere avanzar en eliminarla?':
+    '¿Eliminar la orden '+ot.num+'?';
+  abrirModal('Eliminar '+ot.num,msg,function(){
+    var ots2=loadOTs();var ot2=ots2.find(function(o){return o.id===id;});
+    if(ot2){ot2.estado='eliminada';ot2.actualizado=new Date().toISOString();}
+    saveOTs(ots2);cerrarModal();toast('Orden eliminada');updateBadge();renderLista();
+  });
+}
+function editarOT(id){
+  var ot=loadOTs().find(function(o){return o.id===id;});if(!ot)return;
+  if(ot.estado==='eliminada'||ot.estado==='facturada'){toast('Esta OT no es editable');return;}
+  resetForm();editingId=id;
+  document.getElementById('f-estab').value=ot.establecimiento||'';
+  document.getElementById('f-dueno').value=ot.dueno||'';
+  document.getElementById('f-cuit').value=ot.cuit||'';
+  document.getElementById('f-contacto').value=ot.contacto||'';
+  document.getElementById('f-fecha').value=ot.fecha||'';
+  document.getElementById('f-vet').value=ot.veterinario||'';
+  document.getElementById('f-obs').value=ot.obs||'';
+  fotosData=(ot.fotos||[]).slice();
+  renderFotos();
+  var est=ESTADOS[ot.estado]||ESTADOS.borrador;
+  var badge=document.getElementById('f-estado-badge');
+  if(badge){badge.className='badge '+est.cls;badge.textContent=est.label;}
+  // Viáticos
+  document.getElementById('viaticos-list').innerHTML='';viaticoCnt=0;
+  (ot.viaticos||[]).forEach(function(vt){addViatico(vt);});
+  selectTipo(ot.tipo);
+  showPage('nueva');
+  toast('Editando '+ot.num+' — guardá para confirmar');
+}
+
+// ===== MODAL =====
+function abrirModal(titulo,cuerpo,onOk){
+  document.getElementById('modal-title').textContent=titulo;
+  document.getElementById('modal-body').textContent=cuerpo;
+  document.getElementById('modal-btn').onclick=onOk;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function cerrarModal(){document.getElementById('modal-overlay').classList.remove('show');}
+
+// ===== IMPRIMIR =====
+function imprimirOT(id){
+  var ot=loadOTs().find(function(o){return o.id===id;});if(!ot)return;
+  var srvRows='';
+  (ot.servicios||[]).forEach(function(s){
+    var h=s.honorario||{};
+    var cant=s.cantFacturada!=null?s.cantFacturada:(s.cantidad||s.transferidos||s.embriones||'—');
+    var honDesc=h.tipo==='pajuelas'?h.totalPajuelas+' paj. × $'+h.precioPajuela:
+      h.tipo==='otro'?'monto fijo':(h.tipo||'');
+    srvRows+='<tr><td>'+s.nombre+'</td><td style="text-align:center">'+cant+'</td>'+
+      '<td style="font-size:11px;color:#888">'+honDesc+'</td>'+
+      '<td style="text-align:right">'+(h.total?'$ '+fmt(h.total):'')+'</td></tr>';
+  });
+  var win=window.open('','_blank');
+  var doc='<!DOCTYPE html><html><head><title>'+ot.num+'</title>';
+  doc+='<style>body{font-family:Arial,sans-serif;padding:36px;font-size:13px;color:#222}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:#f0f0f0;padding:7px 10px;text-align:left;font-size:11px;font-weight:700;border-bottom:2px solid #ccc;text-transform:uppercase}td{padding:7px 10px;border-bottom:1px solid #eee}.green{color:#1D9E75;font-weight:700}.gray{color:#888;font-size:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:12px 0}.field .l{font-size:10px;font-weight:700;color:#888;text-transform:uppercase}.field .v{font-size:14px}</style></head><body>';
+  doc+='<div style="display:flex;justify-content:space-between;margin-bottom:20px"><div><h1>Tranquera Abierta</h1><div class="gray">Servicios veterinarios</div></div><div style="text-align:right"><div style="font-size:22px;font-weight:700" class="green">'+ot.num+'</div><div class="gray">OT · '+(ot.estado||'').toUpperCase()+'</div></div></div>';
+  doc+='<div class="grid">';
+  doc+='<div class="field"><div class="l">Establecimiento</div><div class="v">'+(ot.establecimiento||'—')+'</div></div>';
+  doc+='<div class="field"><div class="l">Dueño</div><div class="v">'+(ot.dueno||'—')+'</div></div>';
+  doc+='<div class="field"><div class="l">CUIT</div><div class="v">'+(ot.cuit||'—')+'</div></div>';
+  doc+='<div class="field"><div class="l">Contacto</div><div class="v">'+(ot.contacto||'—')+'</div></div>';
+  doc+='<div class="field"><div class="l">Fecha</div><div class="v">'+fmtF(ot.fecha)+'</div></div>';
+  doc+='<div class="field"><div class="l">Veterinario</div><div class="v">'+(ot.veterinario||'—')+'</div></div>';
+  doc+='<div class="field"><div class="l">Tipo</div><div class="v">'+(ot.tipoLabel||ot.tipo)+'</div></div>';
+  doc+='</div>';
+  doc+='<table><thead><tr><th>Servicio</th><th style="text-align:center">Cantidad</th><th>Detalle</th><th style="text-align:right">Honorario</th></tr></thead><tbody>'+srvRows+'</tbody></table>';
+  doc+='<div style="text-align:right;font-size:17px" class="green">Total honorarios: $ '+fmt(ot.totalHon||0)+'</div>';
+  var viatsNoFact=(ot.viaticos||[]).filter(function(vt){return!vt.facturado;});
+  if(viatsNoFact.length){
+    doc+='<div style="margin-top:12px"><strong>Viáticos:</strong></div><table><thead><tr><th>Vet.</th><th>Móvil de</th><th>Fecha</th><th>Km</th><th style="text-align:right">Total</th></tr></thead><tbody>';
+    viatsNoFact.forEach(function(vt){
+      doc+='<tr><td>'+(vt.vet||'—')+'</td><td>'+(vt.movil||'—')+'</td><td>'+(vt.fecha?fmtF(vt.fecha):'—')+'</td><td>'+(vt.km||0)+'</td><td style="text-align:right">$ '+fmt(vt.total||0)+'</td></tr>';
+    });
+    doc+='</tbody></table><div style="text-align:right;font-size:14px">Total viáticos: $ '+fmt(ot.totalViats||0)+'</div>';
+  }
+  if(ot.obs)doc+='<div style="margin-top:16px;padding:10px;background:#f7f7f5;border-radius:6px"><strong>Obs:</strong> '+ot.obs+'</div>';
+  doc+='<div style="margin-top:24px;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px">Generado '+new Date().toLocaleString('es-AR')+'</div>';
+  doc+='<scr'+'ipt>window.print()<'+'/scr'+'ipt></body></html>';
+  win.document.write(doc);win.document.close();
+}
+
+// ===== EXCEL =====
+function exportarExcel(){
+  var ots=loadOTs();
+  if(currentFilter!=='todas')ots=ots.filter(function(o){return o.estado===currentFilter;});
+  var filtroVet=(document.getElementById('filtro-vet')||{}).value||'';
+  if(filtroVet)ots=ots.filter(function(o){return o.veterinario===filtroVet;});
+  if(!ots.length){toast('No hay órdenes para exportar');return;}
+  ots=ots.slice().sort(function(a,b){return new Date(b.creado)-new Date(a.creado);});
+  var filtroLabel=currentFilter==='todas'?'Todas':currentFilter;
+
+  var H1=[['N° OT','Establecimiento','Dueño','CUIT','Contacto','Fecha','Veterinario','Estado','Tipo','Servicio','Cantidad facturada','Kgs/animal o embrión','Total Kgs','Precio $/kg','Tipo honorario','Total honorario ($)','Viáticos ($)']];
+  ots.forEach(function(ot){
+    var srvs=ot.servicios&&ot.servicios.length?ot.servicios:[{nombre:'(sin servicios)',honorario:{}}];
+    srvs.forEach(function(s,i){
+      var h=s.honorario||{};
+      var cant=s.cantFacturada!=null?s.cantFacturada:(s.cantidad!=null?s.cantidad:(s.transferidos!=null?s.transferidos:(s.embriones||'')));
+      var viatsTotal=i===0?(ot.totalViats||0):'';
+      H1.push([ot.num||'',ot.establecimiento||'',ot.dueno||'',ot.cuit||'',ot.contacto||'',
+        ot.fecha?fmtF(ot.fecha):'',ot.veterinario||'',ot.estado||'',ot.tipoLabel||ot.tipo||'',
+        s.nombre||'',cant,
+        h.tipo==='pajuelas'?(h.totalPajuelas+' paj.'):(h.tipo==='otro'?'':(h.kgsPor||'')),
+        h.tipo==='pajuelas'?'':(h.tipo==='otro'?'':(h.totalKgs||'')),
+        h.tipo==='pajuelas'?('$'+h.precioPajuela+'/paj'):(h.tipo==='otro'?'':(h.precio||'')),
+        h.tipo==='pajuelas'?'pajuelas':(h.tipo||''),h.total||0,viatsTotal]);
+    });
+  });
+
+  var H2=[['N° OT','Establecimiento','Dueño','CUIT','Fecha','Veterinario','Estado','Tipo','Total honorarios ($)','Total viáticos ($)','Vaca preñ. grande','Vaca preñ. chica','Vaca vacía','Vaca descarte','Vaca CUT','Semen nota','GNRH','Semen utilizado','Toros aptos','Toros descarte','Toros comentarios','Transf. % aprovech.','Observaciones']];
+  ots.forEach(function(ot){
+    var e=ot.estadisticas||{};
+    H2.push([ot.num||'',ot.establecimiento||'',ot.dueno||'',ot.cuit||'',
+      ot.fecha?fmtF(ot.fecha):'',ot.veterinario||'',ot.estado||'',ot.tipoLabel||ot.tipo||'',
+      ot.totalHon||0,ot.totalViats||0,
+      e.vpg||0,e.vpc||0,e.vv||0,e.vd||0,e.cut||0,e.semenNota||'',e.gnrh||0,e.semenUtil||'',
+      e.torosAptos||0,e.torosDescarte||0,e.torosComent||'',e.transfAprov||0,ot.obs||'']);
+  });
+
+  generarXLSX([{nombre:'Facturación',datos:H1},{nombre:'Estadísticas',datos:H2}],
+    'TranqueraAbierta_'+filtroLabel+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportando '+ots.length+' OT — 2 hojas ✓');
+}
+
+// ===== MOTOR XLSX NATIVO =====
+function generarXLSX(hojas,filename){
+  var x=function(val){return String(val==null?'':val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+  var col=function(n){var s='';while(n>0){var r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;};
+  function sheetXml(datos){
+    var xml='<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+    datos.forEach(function(fila,ri){
+      xml+='<row r="'+(ri+1)+'">';
+      fila.forEach(function(val,ci){
+        var ref=col(ci+1)+(ri+1);
+        if(typeof val==='number')xml+='<c r="'+ref+'"><v>'+val+'</v></c>';
+        else xml+='<c r="'+ref+'" t="inlineStr"><is><t>'+x(val)+'</t></is></c>';
+      });
+      xml+='</row>';
+    });
+    return xml+'</sheetData></worksheet>';
+  }
+  var sheets=hojas.map(function(h){return sheetXml(h.datos);});
+  var styles='<?xml version="1.0" encoding="UTF-8"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs></styleSheet>';
+  var ss='<?xml version="1.0" encoding="UTF-8"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="0" uniqueCount="0"></sst>';
+  var sheetsOvr=hojas.map(function(_,i){return'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';}).join('');
+  var ct='<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+sheetsOvr+'</Types>';
+  var se=hojas.map(function(h,i){return'<sheet name="'+x(h.nombre)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+2)+'"/>';}).join('');
+  var wb='<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+se+'</sheets></workbook>';
+  var wbre=hojas.map(function(_,i){return'<Relationship Id="rId'+(i+2)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>';}).join('');
+  var wbr='<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+wbre+'<Relationship Id="rId'+(hojas.length+2)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/></Relationships>';
+  var rr='<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  var arch={'[Content_Types].xml':ct,'_rels/.rels':rr,'xl/workbook.xml':wb,'xl/_rels/workbook.xml.rels':wbr,'xl/sharedStrings.xml':ss,'xl/styles.xml':styles};
+  hojas.forEach(function(h,i){arch['xl/worksheets/sheet'+(i+1)+'.xml']=sheets[i];});
+  function sb(s){return new TextEncoder().encode(s);}
+  function u32(n){return[n&0xff,(n>>8)&0xff,(n>>16)&0xff,(n>>24)&0xff];}
+  function u16(n){return[n&0xff,(n>>8)&0xff];}
+  function crc32(buf){var c=0xFFFFFFFF,t=new Uint32Array(256);for(var i=0;i<256;i++){var vv=i;for(var j=0;j<8;j++)vv=vv&1?(0xEDB88320^(vv>>>1)):vv>>>1;t[i]=vv;}for(var i=0;i<buf.length;i++)c=t[(c^buf[i])&0xff]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+  var entries=[],central=[],offset=0;
+  Object.entries(arch).forEach(function(entry){
+    var name=entry[0],content=entry[1];
+    var nb=sb(name),db=sb(content),crc=crc32(db);
+    var local=[0x50,0x4B,0x03,0x04].concat(u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0)).concat(Array.from(nb)).concat(Array.from(db));
+    central.push([0x50,0x4B,0x01,0x02].concat(u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset)).concat(Array.from(nb)));
+    entries=entries.concat(local);offset+=local.length;
+  });
+  var cf=central.reduce(function(a,b){return a.concat(b);},[]);
+  var eocd=[0x50,0x4B,0x05,0x06].concat(u16(0),u16(0),u16(central.length),u16(central.length),u32(cf.length),u32(offset),u16(0));
+  var zip=new Uint8Array(entries.concat(cf).concat(eocd));
+  var blob=new Blob([zip],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},200);
+}
+
+// ===== CONFIG =====
+function renderConfig(){
+  var cfg=loadCfg();
+  var f=cfg.fecha?new Date(cfg.fecha).toLocaleDateString('es-AR'):'—';
+  ['inmag','vacabuena','nafta'].forEach(function(k){
+    var el=document.getElementById('cfg-'+k);if(el)el.value=cfg[k]||'';
+    var em=document.getElementById('cfg-'+k+'-m');if(em)em.value=cfg[k]||'';
+    var ed=document.getElementById('cfg-'+k+'-date');if(ed)ed.textContent=f;
+    var edm=document.getElementById('cfg-'+k+'-date-m');if(edm)edm.textContent=f;
+  });
+}
+function saveConfig(){
+  ['inmag','vacabuena','nafta'].forEach(function(k){
+    var m=document.getElementById('cfg-'+k+'-m');var d=document.getElementById('cfg-'+k);
+    if(m&&m.value&&!d.value)d.value=m.value;
+  });
+  var cfg={inmag:parseFloat(document.getElementById('cfg-inmag').value)||0,
+    vacabuena:parseFloat(document.getElementById('cfg-vacabuena').value)||0,
+    nafta:parseFloat(document.getElementById('cfg-nafta').value)||0,
+    fecha:new Date().toISOString()};
+  saveCfg(cfg);toast('Valores guardados ✓');renderConfig();
+}
+
+// ===== TOAST =====
+function toast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show');},2800);
+}
+
+function maskDate(el){
+  var v=el.value.replace(/\D/g,'');
+  if(v.length>=3&&v.length<5) v=v.slice(0,2)+'/'+v.slice(2);
+  else if(v.length>=5) v=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4,8);
+  el.value=v;
+}
+function fmtFHoy(){
+  var d=new Date();
+  var dd=String(d.getDate()).padStart(2,'0');
+  var mm=String(d.getMonth()+1).padStart(2,'0');
+  var yy=d.getFullYear();
+  return dd+'/'+mm+'/'+yy;
+}
+updateBadge();
+populateVetSelects();
+</script>
+</body>
+</html>
