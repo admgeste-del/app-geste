@@ -197,6 +197,8 @@ table.ot-table tr:hover td{background:#fafaf8}
   table.ot-table th,table.ot-table td{padding:8px 8px;font-size:12px}
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -658,20 +660,55 @@ const ESTADOS = {
   eliminada:{cls:'badge-eliminada',label:'🗑 Eliminada'}
 };
 
-// ===== STORAGE =====
-function loadOTs(){return JSON.parse(localStorage.getItem('ta_ots')||'[]')}
-function saveOTs(d){localStorage.setItem('ta_ots',JSON.stringify(d))}
-function loadCfg(){
-  var c=JSON.parse(localStorage.getItem('ta_cfg')||'{"inmag":0,"vacabuena":0,"nafta":0}');
-  if(!c.inmag&&c.inmac){c.inmag=c.inmac;delete c.inmac;saveCfg(c);} // migración de clave antigua
-  return c;
+// ===== FIREBASE INITIALIZATION & STORAGE =====
+const firebaseConfig = {
+  apiKey: "AIzaSyCk3g6IxO1azmIKAM6hzg_dHJcg4nMwX7U",
+  authDomain: "geste-test.firebaseapp.com",
+  projectId: "geste-test",
+  storageBucket: "geste-test.firebasestorage.app",
+  messagingSenderId: "757142470670",
+  appId: "1:757142470670:web:350df7133c95becb123c5f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let DB_OTS = [];
+let DB_CFG = {inmag:0, vacabuena:0, nafta:0};
+let DB_VETS = VETS_DEFAULT.slice();
+
+function loadOTs(){ return DB_OTS; }
+function loadCfg(){ return DB_CFG; }
+function loadVets(){ return DB_VETS; }
+
+async function initFirebase() {
+  try {
+    const cfgDoc = await db.collection('configuracion').doc('general').get();
+    if (cfgDoc.exists) {
+      DB_CFG = cfgDoc.data();
+    }
+    const vetDoc = await db.collection('veterinarios').doc('lista').get();
+    if (vetDoc.exists && vetDoc.data().nombres) {
+      DB_VETS = vetDoc.data().nombres;
+    }
+    const otSnapshot = await db.collection('ordenes').get();
+    DB_OTS = [];
+    otSnapshot.forEach(function(doc) {
+      DB_OTS.push(doc.data());
+    });
+    populateVetSelects();
+    loadNaftaRef();
+    renderConfig();
+    renderVets();
+    updateBadge();
+    var listaActive = document.getElementById('page-lista') && document.getElementById('page-lista').classList.contains('active');
+    if (listaActive) {
+      renderLista();
+    }
+  } catch (e) {
+    console.error("Error inicializando Firebase:", e);
+    toast('Error cargando datos de la nube');
+  }
 }
-function saveCfg(d){localStorage.setItem('ta_cfg',JSON.stringify(d))}
-function loadVets(){
-  var v=localStorage.getItem('ta_vets');
-  return v?JSON.parse(v):VETS_DEFAULT.slice();
-}
-function saveVets(v){localStorage.setItem('ta_vets',JSON.stringify(v))}
 function nextNum(){
   var ots=loadOTs();
   if(!ots.length)return'OT-001';
@@ -723,22 +760,26 @@ function addVet(){
   if(vets.indexOf(nombre)>=0){toast('Ya existe ese veterinario');return;}
   vets.push(nombre);
   vets.sort();
-  saveVets(vets);
-  input.value='';
-  renderVets();
-  populateVetSelects();
-  toast('Veterinario agregado ✓');
+  db.collection('veterinarios').doc('lista').set({ nombres: vets }).then(function() {
+    DB_VETS = vets;
+    input.value='';
+    renderVets();
+    populateVetSelects();
+    toast('Veterinario agregado ✓');
+  });
 }
 function removeVet(idx){
   var vets=loadVets();
   var nombre=vets[idx];
   abrirModal('¿Eliminar veterinario?','Se eliminará "'+nombre+'" de la lista.',function(){
     vets.splice(idx,1);
-    saveVets(vets);
-    renderVets();
-    populateVetSelects();
-    cerrarModal();
-    toast('Eliminado ✓');
+    db.collection('veterinarios').doc('lista').set({ nombres: vets }).then(function() {
+      DB_VETS = vets;
+      renderVets();
+      populateVetSelects();
+      cerrarModal();
+      toast('Eliminado ✓');
+    });
   });
 }
 
@@ -1175,9 +1216,19 @@ function guardarOT(estadoDestino){
   } else {
     ots.push(ot);
   }
-  saveOTs(ots);
-  toast('Orden '+ot.num+(estadoDestino==='a-facturar'?' enviada a facturar':' guardada')+' ✓');
-  resetForm();updateBadge();showPage('lista');
+
+  if (ot.fotos && ot.fotos.length > 0) {
+    ot.fotos = [];
+    alert("El guardado de fotos está temporalmente deshabilitado en esta versión en la nube");
+  }
+
+  db.collection('ordenes').doc(ot.id).set(ot).then(function() {
+    toast('Orden '+ot.num+(estadoDestino==='a-facturar'?' enviada a facturar':' guardada')+' ✓');
+    resetForm();updateBadge();showPage('lista');
+  }).catch(function(e) {
+    console.error(e);
+    toast('Error guardando en Firebase');
+  });
 }
 
 // ===== RESET =====
@@ -1352,10 +1403,12 @@ function verFoto(otId,idx){
 function cambiarEstado(id,estado){
   var ots=loadOTs();var ot=ots.find(function(o){return o.id===id;});
   if(!ot)return;
-  ot.estado=estado;ot.actualizado=new Date().toISOString();
-  saveOTs(ots);
-  toast('Estado: '+(ESTADOS[estado]?ESTADOS[estado].label:estado)+' ✓');
-  verDetalle(id);
+  var actualizado = new Date().toISOString();
+  ot.estado=estado;ot.actualizado=actualizado;
+  db.collection('ordenes').doc(id).update({estado: estado, actualizado: actualizado}).then(function() {
+    toast('Estado: '+(ESTADOS[estado]?ESTADOS[estado].label:estado)+' ✓');
+    verDetalle(id);
+  });
 }
 function confirmarEliminar(id){
   var ot=loadOTs().find(function(o){return o.id===id;});if(!ot)return;
@@ -1371,8 +1424,11 @@ function eliminarDesdeTabla(id){
     '¿Eliminar la orden '+ot.num+'?';
   abrirModal('Eliminar '+ot.num,msg,function(){
     var ots2=loadOTs();var ot2=ots2.find(function(o){return o.id===id;});
-    if(ot2){ot2.estado='eliminada';ot2.actualizado=new Date().toISOString();}
-    saveOTs(ots2);cerrarModal();toast('Orden eliminada');updateBadge();renderLista();
+    var actualizado = new Date().toISOString();
+    if(ot2){ot2.estado='eliminada';ot2.actualizado=actualizado;}
+    db.collection('ordenes').doc(id).update({estado: 'eliminada', actualizado: actualizado}).then(function() {
+      cerrarModal();toast('Orden eliminada');updateBadge();renderLista();
+    });
   });
 }
 function editarOT(id){
@@ -1563,7 +1619,11 @@ function saveConfig(){
     vacabuena:parseFloat(document.getElementById('cfg-vacabuena').value)||0,
     nafta:parseFloat(document.getElementById('cfg-nafta').value)||0,
     fecha:new Date().toISOString()};
-  saveCfg(cfg);toast('Valores guardados ✓');renderConfig();
+  db.collection('configuracion').doc('general').set(cfg).then(function() {
+    DB_CFG = cfg;
+    toast('Valores guardados ✓');
+    renderConfig();
+  });
 }
 
 // ===== TOAST =====
@@ -1586,8 +1646,7 @@ function fmtFHoy(){
   var yy=d.getFullYear();
   return dd+'/'+mm+'/'+yy;
 }
-updateBadge();
-populateVetSelects();
+initFirebase();
 </script>
 </body>
 </html>
