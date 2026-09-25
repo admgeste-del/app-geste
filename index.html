@@ -1085,18 +1085,39 @@ function leerViaticos(){
 }
 
 // ===== FOTOS =====
-function handleFotos(event){
-  var files=Array.from(event.target.files);
-  files.forEach(function(file){
-    if(!file.type.startsWith('image/'))return;
-    var reader=new FileReader();
-    reader.onload=function(e){
-      fotosData.push(e.target.result);
-      renderFotos();
-    };
-    reader.readAsDataURL(file);
-  });
-  event.target.value='';
+async function handleFotos(event) {
+  if (!firebase.auth().currentUser) {
+    toast('Debes iniciar sesión para subir fotos.');
+    return;
+  }
+  toast('Subiendo foto(s)...');
+
+  var files = Array.from(event.target.files);
+  for (var file of files) {
+    if (!file.type.startsWith('image/')) continue;
+
+    var formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'DemoGeste');
+
+    try {
+      var res = await fetch('https://api.cloudinary.com/v1_1/afvfqavf/image/upload', {
+        method: 'POST',
+        body: formData
+      });
+      var data = await res.json();
+      if (data.secure_url) {
+        fotosData.push(data.secure_url);
+        renderFotos();
+      } else {
+        throw new Error('Sin secure_url en respuesta');
+      }
+    } catch (error) {
+      console.error(error);
+      toast('Error al subir la imagen.');
+    }
+  }
+  event.target.value = '';
 }
 function renderFotos(){
   var grid=document.getElementById('fotos-grid');
