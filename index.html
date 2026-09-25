@@ -1264,11 +1264,6 @@ function guardarOT(estadoDestino){
     ots.push(ot);
   }
 
-  if (ot.fotos && ot.fotos.length > 0) {
-    ot.fotos = [];
-    alert("El guardado de fotos está temporalmente deshabilitado en esta versión en la nube");
-  }
-
   db.collection('ordenes').doc(ot.id).set(ot).then(function() {
     toast('Orden '+ot.num+(estadoDestino==='a-facturar'?' enviada a facturar':' guardada')+' ✓');
     resetForm();updateBadge();showPage('lista');
