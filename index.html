@@ -1687,10 +1687,12 @@ async function login() {
     await auth.signInWithEmailAndPassword(email, pass);
     toast('Sesión iniciada');
   } catch (error) {
-    if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-      toast('Email o contraseña incorrecta');
+    if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+      toast('El correo o la contraseña son incorrectos.');
+    } else if (error.code === 'auth/invalid-email') {
+      toast('El formato del correo no es válido.');
     } else {
-      toast('Error: ' + error.message);
+      toast('Error al iniciar sesión. Intenta nuevamente.');
     }
   }
 }
