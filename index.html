@@ -1264,7 +1264,8 @@ function guardarOT(estadoDestino){
     ots.push(ot);
   }
 
-  db.collection('ordenes').doc(ot.id).set(ot).then(function() {
+  var op = editingId ? db.collection('ordenes').doc(ot.id).update(ot) : db.collection('ordenes').doc(ot.id).set(ot);
+  op.then(function() {
     toast('Orden '+ot.num+(estadoDestino==='a-facturar'?' enviada a facturar':' guardada')+' ✓');
     resetForm();updateBadge();showPage('lista');
   }).catch(function(e) {
@@ -1493,6 +1494,87 @@ function editarOT(id){
   document.getElementById('viaticos-list').innerHTML='';viaticoCnt=0;
   (ot.viaticos||[]).forEach(function(vt){addViatico(vt);});
   selectTipo(ot.tipo);
+
+  // Servicios
+  var srvMap = {
+    'diag': {'Tacto/Ecografía': 'tacto', 'Sangrado': 'sangrado-d', 'TBC': 'tbc-d'},
+    'semen': {'Análisis de semen': 'analisis', 'Espermograma': 'espermograma', 'Colecta y congelación': 'colecta-s'},
+    'iatf': {'Tacto pre servicio': 'tacto-pre', 'Retiro': 'retiro', 'Inseminación': 'inseminacion'},
+    'toros': {'Revisación clínica': 'revision', 'Sangrado': 'sangrado-t', 'Raspaje': 'raspaje', 'TBC': 'tbc-t'},
+    'colecta': {'Embriones congelados': 'vacas-cong', 'TE en fresco': 'vacas-fresco'},
+    'transferencias': {'inOva/Geste': 'inova', 'Embriones de terceros': 'emb-terceros'},
+    'receptoras': {'Revisación receptoras': 'receptoras'},
+    'ecografia': {'Ecografía de carcasa': 'ecografia'}
+  };
+  (ot.servicios || []).forEach(function(s) {
+    var idSrv = (srvMap[ot.tipo] && srvMap[ot.tipo][s.nombre]) || (ot.tipo === 'receptoras' ? 'receptoras' : ot.tipo === 'ecografia' ? 'ecografia' : null);
+    if (!idSrv) return;
+    var cbEl = document.getElementById('cb-' + idSrv);
+    if (cbEl) { cbEl.checked = true; toggleSrv(idSrv); }
+    
+    if (idSrv === 'colecta-s') {
+      var modo = s.modo || 'kgs';
+      setColectaModo(modo);
+      if (modo === 'pajuelas') {
+        document.getElementById('colecta-paj-cant').value = (s.honorario && s.honorario.totalPajuelas) || '';
+        document.getElementById('colecta-paj-precio').value = (s.honorario && s.honorario.precioPajuela) || '';
+        calcColectaPaj();
+      } else {
+        document.getElementById('colecta-kgs-pajuela').value = (s.honorario && s.honorario.kgsPajuela) || '';
+        document.getElementById('colecta-kgs-precio').value = (s.honorario && s.honorario.precio) || '';
+        calcColectaKgs();
+      }
+      (s.toros || []).forEach(function(t) {
+        addToroColecta();
+        document.getElementById('toro-nom-' + toroCount).value = t.nombre || '';
+        document.getElementById('toro-paj-' + toroCount).value = t.pajuelas || '';
+      });
+    } else if (idSrv === 'vacas-cong') {
+      document.getElementById('vacas-cong-vacas').value = s.vacasLavadas || '';
+      document.getElementById('vacas-cong-emb').value = s.embriones || '';
+    } else if (idSrv === 'vacas-fresco') {
+      document.getElementById('vacas-fresco-vacas').value = s.vacasLavadas || '';
+      document.getElementById('vacas-fresco-emb').value = s.embriones || '';
+      document.getElementById('vacas-fresco-prenez').value = s.preneces || '';
+      if(s.baseFacturacion) setBase(idSrv, s.baseFacturacion);
+    } else if (idSrv === 'inova' || idSrv === 'emb-terceros') {
+      document.getElementById(idSrv + '-transf').value = s.transferidos || '';
+      document.getElementById(idSrv + '-prenez').value = s.preneces || '';
+      if(s.baseFacturacion) setBase(idSrv, s.baseFacturacion);
+    } else {
+      var cntMap = {'tacto':'tacto-cant','sangrado-d':'sangrado-d-cant','tbc-d':'tbc-d-cant','analisis':'analisis-cant','espermograma':'espermograma-cant','tacto-pre':'tacto-pre-cant','retiro':'retiro-cant','inseminacion':'inseminacion-cant','revision':'revision-cant','sangrado-t':'sangrado-t-cant','raspaje':'raspaje-cant','tbc-t':'tbc-t-cant','receptoras':'receptoras-cant','ecografia':'ecografia-cant'};
+      if (cntMap[idSrv]) document.getElementById(cntMap[idSrv]).value = s.cantidad || '';
+    }
+    
+    var h = s.honorario;
+    if (h && idSrv !== 'colecta-s') {
+      selHonTipo(idSrv, h.tipo || 'inmag');
+      if (h.tipo === 'otro') {
+        document.getElementById('hon-otro-' + idSrv).value = h.total || '';
+      } else {
+        document.getElementById('hon-kgspor-' + idSrv).value = h.kgsPor || '';
+        document.getElementById('hon-precio-' + idSrv).value = h.precio || '';
+      }
+      calcHon(idSrv);
+    }
+  });
+
+  // Estadísticas
+  var e = ot.estadisticas || {};
+  var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; };
+  setVal('est-vpg', e.vpg);
+  setVal('est-vpc', e.vpc);
+  setVal('est-vv', e.vv);
+  setVal('est-vd', e.vd);
+  setVal('est-cut', e.cut);
+  setVal('est-semen-nota', e.semenNota);
+  setVal('iatf-gnrh', e.gnrh);
+  setVal('iatf-semen', e.semenUtil);
+  setVal('toros-aptos', e.torosAptos);
+  setVal('toros-descarte', e.torosDescarte);
+  setVal('toros-comentarios', e.torosComent);
+  setVal('transf-aprov', e.transfAprov);
+
   showPage('nueva');
   toast('Editando '+ot.num+' — guardá para confirmar');
 }
