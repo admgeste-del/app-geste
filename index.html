@@ -262,7 +262,7 @@ table.ot-table tr:hover td{background:#fafaf8}
       </div>
       <div class="form-row cols2">
         <div class="form-group">
-          <label class="lbl">CUIT a facturar <span class="req">*</span></label>
+          <label class="lbl">CUIT a facturar <span class="opt">(opcional)</span></label>
           <input type="text" id="f-cuit" placeholder="XX-XXXXXXXX-X" maxlength="13" inputmode="numeric">
         </div>
         <div class="form-group">
@@ -1166,7 +1166,6 @@ function guardarOT(estadoDestino){
   var dueno=v('f-dueno').trim();
   var cuit=v('f-cuit').trim();
   if(!estab&&!dueno){toast('Completá al menos Establecimiento o Dueño/Razón Social');return;}
-  if(!cuit){toast('El CUIT a facturar es obligatorio');return;}
   if(!selectedTipo){toast('Seleccioná un tipo de trabajo');return;}
   if(editingId){
     var otExistente=loadOTs().find(function(o){return o.id===editingId;});
